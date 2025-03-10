@@ -5,25 +5,32 @@ use App\Http\Controllers\Auth\LoginController;
 use App\Http\Controllers\HomeController;
 use Illuminate\Support\Facades\Route;
 
-// Home Routes
+// Public Routes
 Route::get('/', [HomeController::class, 'index'])->name('home');
-Route::get('/book/{book}', [HomeController::class, 'showBook'])->name('book.show');
-
-// Admin Routes
-Route::prefix('admin')->name('admin.')->middleware(['auth'])->group(function () {
-    // Dashboard
-    Route::get('/', function () {
-        return view('admin.dashboard');
-    })->name('dashboard');
-
-    // Books CRUD
-    Route::resource('books', BookController::class);
-});
+Route::get('/book/{id}', [HomeController::class, 'show'])->name('book.show');
 
 // Auth Routes
-Route::get('/admin/login', function () {
-    return view('auth.login');
-})->name('login');
+Route::middleware('guest')->group(function () {
+    Route::get('/login', [LoginController::class, 'showLoginForm'])->name('login');
+    Route::post('/login', [LoginController::class, 'login'])->name('login.attempt');
+});
 
-Route::post('/admin/login', [LoginController::class, 'login'])->name('login.attempt');
-Route::post('/logout', [LoginController::class, 'logout'])->name('logout');
+Route::post('/logout', [LoginController::class, 'logout'])
+    ->name('logout')
+    ->middleware('auth');
+
+// Admin Routes
+Route::middleware(['auth'])
+    ->prefix('admin')
+    ->name('admin.')
+    ->group(function () {
+        Route::get('/', function () {
+            return redirect()->route('admin.dashboard');
+        });
+
+        Route::get('/dashboard', function () {
+            return view('admin.dashboard');
+        })->name('dashboard');
+
+        Route::resource('books', BookController::class);
+    });
