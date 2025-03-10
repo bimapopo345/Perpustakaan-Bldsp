@@ -2,11 +2,12 @@
 
 use App\Http\Controllers\Admin\BookController;
 use App\Http\Controllers\Auth\LoginController;
+use App\Http\Controllers\HomeController;
 use Illuminate\Support\Facades\Route;
 
-Route::get('/', function () {
-    return view('welcome');
-});
+// Home Routes
+Route::get('/', [HomeController::class, 'index'])->name('home');
+Route::get('/book/{book}', [HomeController::class, 'showBook'])->name('book.show');
 
 // Admin Routes
 Route::prefix('admin')->name('admin.')->middleware(['auth'])->group(function () {
