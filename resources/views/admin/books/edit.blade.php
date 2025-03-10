@@ -5,15 +5,44 @@
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>Edit Buku - Admin Panel</title>
     <script src="https://cdn.tailwindcss.com"></script>
+    <script defer src="https://unpkg.com/alpinejs@3.x.x/dist/cdn.min.js"></script>
+    <style>
+        .gradient-text {
+            background: linear-gradient(to right, #4F46E5, #7C3AED);
+            -webkit-background-clip: text;
+            -webkit-text-fill-color: transparent;
+        }
+        .gradient-border:focus {
+            border-color: transparent;
+            background-image: linear-gradient(white, white), linear-gradient(to right, #4F46E5, #7C3AED);
+            background-origin: border-box;
+            background-clip: padding-box, border-box;
+        }
+        @keyframes slideIn {
+            from { opacity: 0; transform: translateY(20px); }
+            to { opacity: 1; transform: translateY(0); }
+        }
+        .animate-slideIn {
+            animation: slideIn 0.5s ease-out forwards;
+        }
+    </style>
 </head>
-<body class="bg-gray-100">
+<body class="bg-gray-50" x-data="{ 
+    previewUrl: '{{ $book->thumbnail_path ? asset('storage/' . $book->thumbnail_path) : null }}',
+    handleThumbnailChange(event) {
+        const file = event.target.files[0];
+        if (file) {
+            this.previewUrl = URL.createObjectURL(file);
+        }
+    }
+}">
     <!-- Navigation -->
-    <nav class="bg-white shadow-lg">
+    <nav class="bg-white border-b border-gray-200">
         <div class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
             <div class="flex justify-between h-16">
                 <div class="flex">
                     <div class="flex-shrink-0 flex items-center">
-                        <span class="text-xl font-bold text-gray-800">Admin Panel</span>
+                        <h1 class="text-2xl font-bold gradient-text">Admin Panel</h1>
                     </div>
                     <div class="hidden sm:ml-6 sm:flex sm:space-x-8">
                         <a href="{{ route('admin.dashboard') }}" 
@@ -21,7 +50,7 @@
                             Dashboard
                         </a>
                         <a href="{{ route('admin.books.index') }}" 
-                           class="border-blue-500 text-gray-900 inline-flex items-center px-1 pt-1 border-b-2 text-sm font-medium">
+                           class="border-indigo-500 text-gray-900 inline-flex items-center px-1 pt-1 border-b-2 text-sm font-medium">
                             Kelola Buku
                         </a>
                     </div>
@@ -33,29 +62,37 @@
     <!-- Main Content -->
     <div class="max-w-7xl mx-auto py-6 sm:px-6 lg:px-8">
         <!-- Page Header -->
-        <div class="md:flex md:items-center md:justify-between mb-6">
+        <div class="md:flex md:items-center md:justify-between mb-6 animate-slideIn">
             <div class="flex-1 min-w-0">
-                <h2 class="text-2xl font-bold leading-7 text-gray-900 sm:text-3xl sm:truncate">
+                <h2 class="text-3xl font-bold leading-7 text-gray-900 sm:truncate">
                     Edit Buku: {{ $book->judul }}
                 </h2>
+                <p class="mt-2 text-sm text-gray-500">
+                    Perbarui informasi buku di perpustakaan digital.
+                </p>
             </div>
             <div class="mt-4 flex md:mt-0 md:ml-4">
                 <a href="{{ route('admin.books.index') }}" 
-                   class="inline-flex items-center px-4 py-2 border border-gray-300 rounded-md shadow-sm text-sm font-medium text-gray-700 bg-white hover:bg-gray-50 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-blue-500">
+                   class="inline-flex items-center px-4 py-2 border border-gray-300 rounded-lg shadow-sm text-sm font-medium 
+                          text-gray-700 bg-white hover:bg-gray-50 focus:outline-none focus:ring-2 focus:ring-offset-2 
+                          focus:ring-indigo-500 transition-all duration-300">
+                    <svg class="-ml-1 mr-2 h-5 w-5 text-gray-500" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                        <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M10 19l-7-7m0 0l7-7m-7 7h18"/>
+                    </svg>
                     Kembali
                 </a>
             </div>
         </div>
 
         <!-- Form Card -->
-        <div class="bg-white shadow overflow-hidden sm:rounded-lg">
+        <div class="bg-white rounded-2xl shadow-xl overflow-hidden animate-slideIn" style="animation-delay: 0.1s">
             <form action="{{ route('admin.books.update', $book) }}" method="POST" enctype="multipart/form-data" class="divide-y divide-gray-200">
                 @csrf
                 @method('PUT')
                 <div class="px-4 py-5 sm:p-6">
                     <!-- Validation Errors -->
                     @if ($errors->any())
-                        <div class="rounded-md bg-red-50 p-4 mb-6">
+                        <div class="rounded-lg bg-red-50 p-4 mb-6">
                             <div class="flex">
                                 <div class="flex-shrink-0">
                                     <svg class="h-5 w-5 text-red-400" fill="none" stroke="currentColor" viewBox="0 0 24 24">
@@ -79,78 +116,92 @@
                         </div>
                     @endif
 
-                    <!-- Form Fields -->
+                    <!-- Form Grid -->
                     <div class="grid grid-cols-1 gap-y-6 gap-x-4 sm:grid-cols-6">
                         <div class="sm:col-span-6">
-                            <label for="judul" class="block text-sm font-medium text-gray-700">
+                            <label for="judul" class="block text-sm font-semibold text-gray-700">
                                 Judul Buku
                             </label>
                             <div class="mt-1">
                                 <input type="text" name="judul" id="judul" 
-                                       class="shadow-sm focus:ring-blue-500 focus:border-blue-500 block w-full sm:text-sm border-gray-300 rounded-md"
+                                       class="block w-full rounded-lg border-gray-300 shadow-sm focus:ring-2 focus:ring-indigo-500 
+                                              focus:border-transparent transition-all duration-300"
                                        value="{{ old('judul', $book->judul) }}" required>
                             </div>
                         </div>
 
                         <div class="sm:col-span-3">
-                            <label for="thumbnail" class="block text-sm font-medium text-gray-700">
+                            <label for="thumbnail" class="block text-sm font-semibold text-gray-700">
                                 Thumbnail Buku
                             </label>
-                            @if($book->thumbnail_path)
-                                <div class="mt-2 mb-2">
-                                    <img src="{{ asset('storage/' . $book->thumbnail_path) }}" 
-                                         alt="Thumbnail saat ini"
-                                         class="h-48 w-48 object-cover rounded-lg shadow-md">
+                            <div class="mt-1 flex justify-center px-6 pt-5 pb-6 border-2 border-gray-300 border-dashed rounded-lg hover:border-indigo-500 transition-colors duration-300">
+                                <div class="space-y-1 text-center">
+                                    <template x-if="previewUrl">
+                                        <img :src="previewUrl" class="mx-auto h-32 w-auto object-cover rounded-lg">
+                                    </template>
+                                    <template x-if="!previewUrl">
+                                        <svg class="mx-auto h-12 w-12 text-gray-400" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                                            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" 
+                                                  d="M4 16l4.586-4.586a2 2 0 012.828 0L16 16m-2-2l1.586-1.586a2 2 0 012.828 0L20 14m-6-6h.01M6 20h12a2 2 0 002-2V6a2 2 0 00-2-2H6a2 2 0 00-2 2v12a2 2 0 002 2z"/>
+                                        </svg>
+                                    </template>
+                                    <div class="flex text-sm text-gray-600">
+                                        <label for="thumbnail" class="relative cursor-pointer rounded-md font-medium text-indigo-600 hover:text-indigo-500">
+                                            <span>Ganti thumbnail</span>
+                                            <input id="thumbnail" name="thumbnail" type="file" accept="image/*" class="sr-only"
+                                                   @change="handleThumbnailChange">
+                                        </label>
+                                    </div>
+                                    <p class="text-xs text-gray-500">PNG, JPG hingga 2MB</p>
                                 </div>
-                            @endif
-                            <div class="mt-1">
-                                <input type="file" name="thumbnail" id="thumbnail"
-                                       class="shadow-sm focus:ring-blue-500 focus:border-blue-500 block w-full sm:text-sm border-gray-300"
-                                       accept="image/*">
                             </div>
-                            <p class="mt-2 text-sm text-gray-500">
-                                Gambar JPG/PNG dengan ukuran maksimal 2MB. Biarkan kosong jika tidak ingin mengubah thumbnail.
-                            </p>
                         </div>
 
                         <div class="sm:col-span-3">
-                            <label for="file" class="block text-sm font-medium text-gray-700">
+                            <label for="file" class="block text-sm font-semibold text-gray-700">
                                 File PDF
                             </label>
-                            @if($book->file_path)
-                                <div class="mt-2 mb-2 text-sm text-gray-500">
-                                    File saat ini: {{ basename($book->file_path) }}
+                            <div class="mt-1 flex justify-center px-6 pt-5 pb-6 border-2 border-gray-300 border-dashed rounded-lg hover:border-indigo-500 transition-colors duration-300">
+                                <div class="space-y-1 text-center">
+                                    <svg class="mx-auto h-12 w-12 text-gray-400" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                                        <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" 
+                                              d="M9 12h6m-6 4h6m2 5H7a2 2 0 01-2-2V5a2 2 0 012-2h5.586a1 1 0 01.707.293l5.414 5.414a1 1 0 01.293.707V19a2 2 0 01-2 2z"/>
+                                    </svg>
+                                    <div class="flex text-sm text-gray-600">
+                                        <label for="file" class="relative cursor-pointer rounded-md font-medium text-indigo-600 hover:text-indigo-500">
+                                            <span>{{ $book->file_path ? 'Ganti PDF' : 'Upload PDF' }}</span>
+                                            <input id="file" name="file" type="file" accept=".pdf" class="sr-only">
+                                        </label>
+                                    </div>
+                                    @if($book->file_path)
+                                        <p class="text-xs text-gray-500">File saat ini: {{ basename($book->file_path) }}</p>
+                                    @endif
+                                    <p class="text-xs text-gray-500">PDF hingga 10MB</p>
                                 </div>
-                            @endif
-                            <div class="mt-1">
-                                <input type="file" name="file" id="file"
-                                       class="shadow-sm focus:ring-blue-500 focus:border-blue-500 block w-full sm:text-sm border-gray-300"
-                                       accept=".pdf">
                             </div>
-                            <p class="mt-2 text-sm text-gray-500">
-                                File PDF dengan ukuran maksimal 10MB. Biarkan kosong jika tidak ingin mengubah file PDF.
-                            </p>
                         </div>
 
                         <div class="sm:col-span-2">
-                            <label for="tahun_terbit" class="block text-sm font-medium text-gray-700">
+                            <label for="tahun_terbit" class="block text-sm font-semibold text-gray-700">
                                 Tahun Terbit
                             </label>
                             <div class="mt-1">
                                 <input type="number" name="tahun_terbit" id="tahun_terbit" 
-                                       class="shadow-sm focus:ring-blue-500 focus:border-blue-500 block w-full sm:text-sm border-gray-300 rounded-md"
+                                       class="block w-full rounded-lg border-gray-300 shadow-sm focus:ring-2 focus:ring-indigo-500 
+                                              focus:border-transparent transition-all duration-300"
                                        min="1900" max="{{ date('Y') }}"
                                        value="{{ old('tahun_terbit', $book->tahun_terbit) }}" required>
                             </div>
                         </div>
 
                         <div class="sm:col-span-6">
-                            <label for="deskripsi" class="block text-sm font-medium text-gray-700">
+                            <label for="deskripsi" class="block text-sm font-semibold text-gray-700">
                                 Deskripsi
                             </label>
                             <div class="mt-1">
                                 <textarea id="deskripsi" name="deskripsi" rows="4"
-                                          class="shadow-sm focus:ring-blue-500 focus:border-blue-500 block w-full sm:text-sm border-gray-300 rounded-md"
+                                          class="block w-full rounded-lg border-gray-300 shadow-sm focus:ring-2 focus:ring-indigo-500 
+                                                 focus:border-transparent transition-all duration-300"
                                           required>{{ old('deskripsi', $book->deskripsi) }}</textarea>
                             </div>
                         </div>
@@ -159,12 +210,22 @@
 
                 <div class="px-4 py-3 bg-gray-50 text-right sm:px-6">
                     <button type="submit"
-                            class="inline-flex justify-center py-2 px-4 border border-transparent shadow-sm text-sm font-medium rounded-md text-white bg-blue-600 hover:bg-blue-700 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-blue-500">
-                        Update Buku
+                            class="inline-flex justify-center py-2 px-6 border border-transparent shadow-sm text-sm font-medium 
+                                   rounded-lg text-white bg-gradient-to-r from-indigo-600 to-purple-600 hover:from-indigo-700 
+                                   hover:to-purple-700 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-indigo-500 
+                                   transition-all duration-300 transform hover:scale-105">
+                        Simpan Perubahan
                     </button>
                 </div>
             </form>
         </div>
+    </div>
+
+    <!-- Decorative Elements -->
+    <div class="fixed top-0 right-0 -z-10 opacity-10">
+        <svg class="w-96 h-96 text-indigo-600" fill="currentColor" viewBox="0 0 200 200">
+            <path d="M45,-77.2C58.3,-70.3,69,-58.2,77.2,-44.2C85.4,-30.2,91.1,-15.1,89.8,-0.7C88.6,13.6,80.4,27.3,71.5,40.1C62.6,53,53,65.1,40.3,73.3C27.6,81.5,13.8,85.8,0.4,85.2C-13,84.5,-26,78.9,-39.1,71.5C-52.2,64.1,-65.4,55,-73.7,42.1C-82,29.2,-85.4,14.6,-84.6,0.4C-83.8,-13.7,-78.9,-27.4,-70.6,-39.2C-62.2,-50.9,-50.5,-60.7,-37.6,-67.5C-24.7,-74.3,-12.4,-78.2,1.7,-81C15.8,-83.9,31.7,-84.1,45,-77.2Z" transform="translate(100 100)" />
+        </svg>
     </div>
 </body>
 </html>
