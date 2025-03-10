@@ -27,6 +27,7 @@ class HomeController extends Controller
             'judul' => $book->judul,
             'tahun_terbit' => $book->tahun_terbit,
             'deskripsi' => $book->deskripsi,
+            'thumbnail_path' => $book->thumbnail_path ? asset('storage/' . $book->thumbnail_path) : null,
             'file_path' => asset('storage/' . $book->file_path)
         ]);
     }

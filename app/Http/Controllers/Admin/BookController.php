@@ -25,6 +25,7 @@ class BookController extends Controller
         $request->validate([
             'judul' => 'required|string|max:255',
             'file' => 'required|mimes:pdf|max:10240',
+            'thumbnail' => 'required|image|mimes:jpeg,png,jpg|max:2048',
             'tahun_terbit' => 'required|integer|min:1900|max:' . date('Y'),
             'deskripsi' => 'required|string'
         ]);
@@ -32,9 +33,13 @@ class BookController extends Controller
         $file = $request->file('file');
         $filePath = $file->store('books', 'public');
 
+        $thumbnail = $request->file('thumbnail');
+        $thumbnailPath = $thumbnail->store('thumbnails', 'public');
+
         Book::create([
             'judul' => $request->judul,
             'file_path' => $filePath,
+            'thumbnail_path' => $thumbnailPath,
             'tahun_terbit' => $request->tahun_terbit,
             'deskripsi' => $request->deskripsi
         ]);
@@ -52,6 +57,7 @@ class BookController extends Controller
         $request->validate([
             'judul' => 'required|string|max:255',
             'file' => 'nullable|mimes:pdf|max:10240',
+            'thumbnail' => 'nullable|image|mimes:jpeg,png,jpg|max:2048',
             'tahun_terbit' => 'required|integer|min:1900|max:' . date('Y'),
             'deskripsi' => 'required|string'
         ]);
@@ -63,13 +69,19 @@ class BookController extends Controller
         ];
 
         if ($request->hasFile('file')) {
-            // Hapus file lama
             if ($book->file_path) {
                 Storage::disk('public')->delete($book->file_path);
             }
-            // Upload file baru
             $file = $request->file('file');
             $data['file_path'] = $file->store('books', 'public');
+        }
+
+        if ($request->hasFile('thumbnail')) {
+            if ($book->thumbnail_path) {
+                Storage::disk('public')->delete($book->thumbnail_path);
+            }
+            $thumbnail = $request->file('thumbnail');
+            $data['thumbnail_path'] = $thumbnail->store('thumbnails', 'public');
         }
 
         $book->update($data);
@@ -83,6 +95,10 @@ class BookController extends Controller
             Storage::disk('public')->delete($book->file_path);
         }
         
+        if ($book->thumbnail_path) {
+            Storage::disk('public')->delete($book->thumbnail_path);
+        }
+
         $book->delete();
 
         return redirect()->route('admin.books.index')->with('success', 'Buku berhasil dihapus');

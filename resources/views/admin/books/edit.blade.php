@@ -57,16 +57,33 @@
                                required>
                     </div>
 
-                    <div>
-                        <label for="file" class="block text-sm font-medium text-gray-700">File PDF</label>
-                        <input type="file" name="file" id="file" accept=".pdf"
-                               class="mt-1 block w-full text-sm text-gray-500 file:mr-4 file:py-2 file:px-4 file:rounded-full file:border-0 file:text-sm file:font-semibold file:bg-blue-50 file:text-blue-700 hover:file:bg-blue-100">
-                        <p class="mt-1 text-sm text-gray-500">
-                            File PDF maksimal 10MB. Biarkan kosong jika tidak ingin mengganti file.
-                            @if($book->file_path)
-                                <br>File saat ini: {{ basename($book->file_path) }}
+                    <div class="grid grid-cols-1 md:grid-cols-2 gap-6">
+                        <div>
+                            <label for="thumbnail" class="block text-sm font-medium text-gray-700">Thumbnail Buku</label>
+                            @if($book->thumbnail_path)
+                                <div class="mt-2 mb-2">
+                                    <img src="{{ asset('storage/' . $book->thumbnail_path) }}" alt="Thumbnail saat ini" 
+                                         class="w-48 h-48 object-cover rounded-lg">
+                                </div>
                             @endif
-                        </p>
+                            <input type="file" name="thumbnail" id="thumbnail" accept="image/*"
+                                   class="mt-1 block w-full text-sm text-gray-500 file:mr-4 file:py-2 file:px-4 file:rounded-full file:border-0 file:text-sm file:font-semibold file:bg-blue-50 file:text-blue-700 hover:file:bg-blue-100">
+                            <p class="mt-1 text-sm text-gray-500">
+                                Gambar (JPG, PNG) maksimal 2MB. Biarkan kosong jika tidak ingin mengganti thumbnail.
+                            </p>
+                        </div>
+
+                        <div>
+                            <label for="file" class="block text-sm font-medium text-gray-700">File PDF</label>
+                            <input type="file" name="file" id="file" accept=".pdf"
+                                   class="mt-1 block w-full text-sm text-gray-500 file:mr-4 file:py-2 file:px-4 file:rounded-full file:border-0 file:text-sm file:font-semibold file:bg-blue-50 file:text-blue-700 hover:file:bg-blue-100">
+                            <p class="mt-1 text-sm text-gray-500">
+                                File PDF maksimal 10MB. Biarkan kosong jika tidak ingin mengganti file.
+                                @if($book->file_path)
+                                    <br>File saat ini: {{ basename($book->file_path) }}
+                                @endif
+                            </p>
+                        </div>
                     </div>
 
                     <div>

@@ -9,6 +9,7 @@ class Book extends Model
     protected $fillable = [
         'judul',
         'file_path',
+        'thumbnail_path',
         'tahun_terbit',
         'deskripsi'
     ];

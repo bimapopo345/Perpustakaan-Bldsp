@@ -55,12 +55,22 @@
                                required>
                     </div>
 
-                    <div>
-                        <label for="file" class="block text-sm font-medium text-gray-700">File PDF</label>
-                        <input type="file" name="file" id="file" accept=".pdf"
-                               class="mt-1 block w-full text-sm text-gray-500 file:mr-4 file:py-2 file:px-4 file:rounded-full file:border-0 file:text-sm file:font-semibold file:bg-blue-50 file:text-blue-700 hover:file:bg-blue-100"
-                               required>
-                        <p class="mt-1 text-sm text-gray-500">File PDF maksimal 10MB</p>
+                    <div class="grid grid-cols-1 md:grid-cols-2 gap-6">
+                        <div>
+                            <label for="thumbnail" class="block text-sm font-medium text-gray-700">Thumbnail Buku</label>
+                            <input type="file" name="thumbnail" id="thumbnail" accept="image/*"
+                                   class="mt-1 block w-full text-sm text-gray-500 file:mr-4 file:py-2 file:px-4 file:rounded-full file:border-0 file:text-sm file:font-semibold file:bg-blue-50 file:text-blue-700 hover:file:bg-blue-100"
+                                   required>
+                            <p class="mt-1 text-sm text-gray-500">Gambar (JPG, PNG) maksimal 2MB</p>
+                        </div>
+
+                        <div>
+                            <label for="file" class="block text-sm font-medium text-gray-700">File PDF</label>
+                            <input type="file" name="file" id="file" accept=".pdf"
+                                   class="mt-1 block w-full text-sm text-gray-500 file:mr-4 file:py-2 file:px-4 file:rounded-full file:border-0 file:text-sm file:font-semibold file:bg-blue-50 file:text-blue-700 hover:file:bg-blue-100"
+                                   required>
+                            <p class="mt-1 text-sm text-gray-500">File PDF maksimal 10MB</p>
+                        </div>
                     </div>
 
                     <div>
