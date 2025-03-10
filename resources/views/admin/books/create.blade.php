@@ -88,7 +88,7 @@
         <div class="bg-white rounded-2xl shadow-xl overflow-hidden animate-slideIn" style="animation-delay: 0.1s">
             <form action="{{ route('admin.books.store') }}" method="POST" enctype="multipart/form-data" class="divide-y divide-gray-200">
                 @csrf
-                <div class="px-4 py-5 sm:p-6">
+                <div class="px-8 py-8">
                     <!-- Validation Errors -->
                     @if ($errors->any())
                         <div class="rounded-lg bg-red-50 p-4 mb-6">
@@ -116,22 +116,22 @@
                     @endif
 
                     <!-- Form Grid -->
-                    <div class="grid grid-cols-1 gap-y-6 gap-x-4 sm:grid-cols-6">
+                    <div class="grid grid-cols-1 gap-y-8 gap-x-4 sm:grid-cols-6">
                         <div class="sm:col-span-6">
-                            <label for="judul" class="block text-sm font-semibold text-gray-700">
+                            <label for="judul" class="block text-sm font-semibold text-gray-700 mb-2">
                                 Judul Buku
                             </label>
                             <div class="mt-1">
                                 <input type="text" name="judul" id="judul" 
                                        class="block w-full rounded-lg border-gray-300 shadow-sm focus:ring-2 focus:ring-indigo-500 
-                                              focus:border-transparent transition-all duration-300"
+                                              focus:border-transparent transition-all duration-300 py-3 px-4"
                                        placeholder="Masukkan judul buku"
                                        value="{{ old('judul') }}" required>
                             </div>
                         </div>
 
                         <div class="sm:col-span-3">
-                            <label for="thumbnail" class="block text-sm font-semibold text-gray-700">
+                            <label for="thumbnail" class="block text-sm font-semibold text-gray-700 mb-2">
                                 Thumbnail Buku
                             </label>
                             <div class="mt-1 flex justify-center px-6 pt-5 pb-6 border-2 border-gray-300 border-dashed rounded-lg hover:border-indigo-500 transition-colors duration-300">
@@ -145,14 +145,14 @@
                                     <template x-if="previewUrl">
                                         <img :src="previewUrl" class="mx-auto h-32 w-auto object-cover rounded-lg">
                                     </template>
-                                    <div class="flex text-sm text-gray-600">
+                                    <div class="flex text-sm text-gray-600 mt-4">
                                         <label for="thumbnail" class="relative cursor-pointer rounded-md font-medium text-indigo-600 hover:text-indigo-500 focus-within:outline-none focus-within:ring-2 focus-within:ring-offset-2 focus-within:ring-indigo-500">
                                             <span>Upload thumbnail</span>
                                             <input id="thumbnail" name="thumbnail" type="file" accept="image/*" class="sr-only"
                                                    @change="handleThumbnailChange" required>
                                         </label>
                                     </div>
-                                    <p class="text-xs text-gray-500">
+                                    <p class="text-xs text-gray-500 mt-2">
                                         PNG, JPG hingga 2MB
                                     </p>
                                 </div>
@@ -160,7 +160,7 @@
                         </div>
 
                         <div class="sm:col-span-3">
-                            <label for="file" class="block text-sm font-semibold text-gray-700">
+                            <label for="file" class="block text-sm font-semibold text-gray-700 mb-2">
                                 File PDF
                             </label>
                             <div class="mt-1 flex justify-center px-6 pt-5 pb-6 border-2 border-gray-300 border-dashed rounded-lg hover:border-indigo-500 transition-colors duration-300">
@@ -169,13 +169,13 @@
                                         <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" 
                                               d="M9 12h6m-6 4h6m2 5H7a2 2 0 01-2-2V5a2 2 0 012-2h5.586a1 1 0 01.707.293l5.414 5.414a1 1 0 01.293.707V19a2 2 0 01-2 2z"/>
                                     </svg>
-                                    <div class="flex text-sm text-gray-600">
-                                        <label for="file" class="relative cursor-pointer rounded-md font-medium text-indigo-600 hover:text-indigo-500 focus-within:outline-none focus-within:ring-2 focus-within:ring-offset-2 focus-within:ring-indigo-500">
+                                    <div class="flex text-sm text-gray-600 mt-4">
+                                        <label for="file" class="relative cursor-pointer rounded-md font-medium text-indigo-600 hover:text-indigo-500">
                                             <span>Upload PDF</span>
                                             <input id="file" name="file" type="file" accept=".pdf" class="sr-only" required>
                                         </label>
                                     </div>
-                                    <p class="text-xs text-gray-500">
+                                    <p class="text-xs text-gray-500 mt-2">
                                         PDF hingga 10MB
                                     </p>
                                 </div>
@@ -183,26 +183,26 @@
                         </div>
 
                         <div class="sm:col-span-2">
-                            <label for="tahun_terbit" class="block text-sm font-semibold text-gray-700">
+                            <label for="tahun_terbit" class="block text-sm font-semibold text-gray-700 mb-2">
                                 Tahun Terbit
                             </label>
                             <div class="mt-1">
                                 <input type="number" name="tahun_terbit" id="tahun_terbit" 
                                        class="block w-full rounded-lg border-gray-300 shadow-sm focus:ring-2 focus:ring-indigo-500 
-                                              focus:border-transparent transition-all duration-300"
+                                              focus:border-transparent transition-all duration-300 py-3 px-4"
                                        min="1900" max="{{ date('Y') }}"
                                        value="{{ old('tahun_terbit') }}" required>
                             </div>
                         </div>
 
                         <div class="sm:col-span-6">
-                            <label for="deskripsi" class="block text-sm font-semibold text-gray-700">
+                            <label for="deskripsi" class="block text-sm font-semibold text-gray-700 mb-2">
                                 Deskripsi
                             </label>
                             <div class="mt-1">
                                 <textarea id="deskripsi" name="deskripsi" rows="4"
                                           class="block w-full rounded-lg border-gray-300 shadow-sm focus:ring-2 focus:ring-indigo-500 
-                                                 focus:border-transparent transition-all duration-300"
+                                                 focus:border-transparent transition-all duration-300 py-3 px-4"
                                           placeholder="Masukkan deskripsi buku"
                                           required>{{ old('deskripsi') }}</textarea>
                             </div>
@@ -210,9 +210,9 @@
                     </div>
                 </div>
 
-                <div class="px-4 py-3 bg-gray-50 text-right sm:px-6">
+                <div class="px-8 py-5 bg-gray-50">
                     <button type="submit"
-                            class="inline-flex justify-center py-2 px-6 border border-transparent shadow-sm text-sm font-medium 
+                            class="w-full sm:w-auto inline-flex justify-center py-3 px-8 border border-transparent shadow-sm text-sm font-medium 
                                    rounded-lg text-white bg-gradient-to-r from-indigo-600 to-purple-600 hover:from-indigo-700 
                                    hover:to-purple-700 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-indigo-500 
                                    transition-all duration-300 transform hover:scale-105">
