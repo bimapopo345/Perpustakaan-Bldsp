@@ -41,6 +41,10 @@
                            class="border-transparent text-gray-500 hover:border-gray-300 hover:text-gray-700 inline-flex items-center px-1 pt-1 border-b-2 text-sm font-medium">
                             Kelola Buku
                         </a>
+                        <a href="{{ route('admin.members.index') }}"
+                           class="border-transparent text-gray-500 hover:border-gray-300 hover:text-gray-700 inline-flex items-center px-1 pt-1 border-b-2 text-sm font-medium">
+                            Kelola Member
+                        </a>
                         <a href="{{ route('home') }}" 
                            class="border-transparent text-gray-500 hover:border-gray-300 hover:text-gray-700 inline-flex items-center px-1 pt-1 border-b-2 text-sm font-medium">
                             Lihat Website
@@ -101,6 +105,36 @@
                         <a href="{{ route('admin.books.index') }}" 
                            class="font-medium text-indigo-600 hover:text-indigo-500 inline-flex items-center">
                             Lihat semua buku
+                            <svg class="ml-2 w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 5l7 7-7 7" />
+                            </svg>
+                        </a>
+                    </div>
+                </div>
+            </div>
+
+            <!-- Total Members Card -->
+            <div class="bg-white overflow-hidden rounded-2xl shadow-xl card-hover">
+                <div class="p-6">
+                    <div class="flex items-center">
+                        <div class="flex-shrink-0 p-3 rounded-lg bg-purple-500">
+                            <svg class="h-8 w-8 text-white" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 4.354a4 4 0 110 5.292M15 21H3v-1a6 6 0 0112 0v1zm0 0h6v-1a6 6 0 00-9-5.197M13 7a4 4 0 11-8 0 4 4 0 018 0z"></path>
+                            </svg>
+                        </div>
+                        <div class="ml-5 w-0 flex-1">
+                            <dl>
+                                <dt class="text-sm font-medium text-gray-500 truncate">Total Member</dt>
+                                <dd class="text-3xl font-bold text-gray-900">{{ \App\Models\User::where('role', 'member')->count() }}</dd>
+                            </dl>
+                        </div>
+                    </div>
+                </div>
+                <div class="bg-gray-50 px-5 py-3">
+                    <div class="text-sm">
+                        <a href="{{ route('admin.members.index') }}" 
+                           class="font-medium text-purple-600 hover:text-purple-500 inline-flex items-center">
+                            Lihat semua member
                             <svg class="ml-2 w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                                 <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 5l7 7-7 7" />
                             </svg>

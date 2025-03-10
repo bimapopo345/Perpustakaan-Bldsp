@@ -1,9 +1,12 @@
 <?php
 
 use App\Http\Controllers\Admin\BookController as AdminBookController;
+use App\Http\Controllers\Admin\MemberController as AdminMemberController;
 use App\Http\Controllers\Auth\LoginController;
+use App\Http\Controllers\Auth\RegisterController;
 use App\Http\Controllers\BookController;
 use App\Http\Controllers\HomeController;
+use App\Http\Controllers\MemberController;
 use Illuminate\Support\Facades\Route;
 
 // Public Routes
@@ -16,6 +19,15 @@ Route::get('/book/{id}/pdf', [BookController::class, 'viewPdf'])->name('books.vi
 Route::middleware('guest')->group(function () {
     Route::get('/login', [LoginController::class, 'showLoginForm'])->name('login');
     Route::post('/login', [LoginController::class, 'login'])->name('login.attempt');
+    
+    // Register Routes
+    Route::get('/register', [RegisterController::class, 'showRegistrationForm'])->name('register');
+    Route::post('/register', [RegisterController::class, 'register'])->name('register.attempt');
+});
+
+// Member Routes
+Route::middleware(['auth', 'role:member'])->group(function () {
+    Route::get('/member/dashboard', [MemberController::class, 'dashboard'])->name('member.dashboard');
 });
 
 Route::post('/logout', [LoginController::class, 'logout'])
@@ -23,7 +35,7 @@ Route::post('/logout', [LoginController::class, 'logout'])
     ->middleware('auth');
 
 // Admin Routes
-Route::middleware(['auth'])
+Route::middleware(['auth', 'role:admin'])
     ->prefix('admin')
     ->name('admin.')
     ->group(function () {
@@ -36,4 +48,5 @@ Route::middleware(['auth'])
         })->name('dashboard');
 
         Route::resource('books', AdminBookController::class);
+        Route::get('/members', [AdminMemberController::class, 'index'])->name('members.index');
     });

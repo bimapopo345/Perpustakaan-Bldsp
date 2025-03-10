@@ -48,10 +48,37 @@
             <nav class="py-4">
                 <div class="flex justify-between items-center">
                     <div class="text-2xl font-bold text-white">Perpustakaan Digital</div>
-                    <a href="{{ route('admin.dashboard') }}" 
-                       class="px-4 py-2 rounded-lg bg-white/20 text-white hover:bg-white/30 transition-colors duration-300">
-                        Login Admin
-                    </a>
+                    <div class="flex gap-4">
+                    @auth
+                        @if(auth()->user()->role === 'admin')
+                            <a href="{{ route('admin.dashboard') }}" 
+                               class="px-4 py-2 rounded-lg bg-indigo-600 text-white hover:bg-indigo-700 transition-colors duration-300">
+                                Dashboard Admin
+                            </a>
+                        @else
+                            <a href="{{ route('member.dashboard') }}" 
+                               class="px-4 py-2 rounded-lg bg-indigo-600 text-white hover:bg-indigo-700 transition-colors duration-300">
+                                Dashboard Member
+                            </a>
+                        @endif
+                        <form action="{{ route('logout') }}" method="POST" class="inline">
+                            @csrf
+                            <button type="submit" 
+                                    class="px-4 py-2 rounded-lg bg-red-600 text-white hover:bg-red-700 transition-colors duration-300">
+                                Logout
+                            </button>
+                        </form>
+                    @else
+                        <a href="{{ route('login') }}" 
+                           class="px-4 py-2 rounded-lg bg-white/20 text-white hover:bg-white/30 transition-colors duration-300">
+                            Login
+                        </a>
+                        <a href="{{ route('register') }}" 
+                           class="px-4 py-2 rounded-lg bg-indigo-600 text-white hover:bg-indigo-700 transition-colors duration-300">
+                            Register
+                        </a>
+                    @endauth
+                </div>
                 </div>
             </nav>
 
