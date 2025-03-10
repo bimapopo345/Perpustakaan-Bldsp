@@ -74,8 +74,7 @@
                                     <h4 class="text-lg font-semibold text-gray-900 mb-2">Deskripsi</h4>
                                     <p class="text-gray-600" x-text="selectedBook?.deskripsi"></p>
                                 </div>
-                                <a :href="selectedBook?.file_path" 
-                                   target="_blank"
+                                <a :href="selectedBook?.read_url"
                                    class="inline-flex items-center px-6 py-3 border border-transparent text-base font-medium 
                                           rounded-xl text-white bg-gradient-to-r from-indigo-600 to-purple-600 
                                           hover:from-indigo-700 hover:to-purple-700 focus:outline-none focus:ring-2 

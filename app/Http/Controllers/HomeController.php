@@ -32,7 +32,8 @@ class HomeController extends Controller
             'tahun_terbit' => $book->tahun_terbit,
             'deskripsi' => $book->deskripsi,
             'thumbnail_path' => $book->thumbnail_path ? asset('storage/' . $book->thumbnail_path) : null,
-            'file_path' => $book->file_path ? asset('storage/' . $book->file_path) : null,
+            'read_url' => route('books.read', $book->id),
+            'file_path' => route('books.view-pdf', $book->id),
         ]);
     }
 }

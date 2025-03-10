@@ -1,13 +1,16 @@
 <?php
 
-use App\Http\Controllers\Admin\BookController;
+use App\Http\Controllers\Admin\BookController as AdminBookController;
 use App\Http\Controllers\Auth\LoginController;
+use App\Http\Controllers\BookController;
 use App\Http\Controllers\HomeController;
 use Illuminate\Support\Facades\Route;
 
 // Public Routes
 Route::get('/', [HomeController::class, 'index'])->name('home');
 Route::get('/book/{id}', [HomeController::class, 'show'])->name('book.show');
+Route::get('/book/{id}/read', [BookController::class, 'read'])->name('books.read');
+Route::get('/book/{id}/pdf', [BookController::class, 'viewPdf'])->name('books.view-pdf');
 
 // Auth Routes
 Route::middleware('guest')->group(function () {
@@ -32,5 +35,5 @@ Route::middleware(['auth'])
             return view('admin.dashboard');
         })->name('dashboard');
 
-        Route::resource('books', BookController::class);
+        Route::resource('books', AdminBookController::class);
     });

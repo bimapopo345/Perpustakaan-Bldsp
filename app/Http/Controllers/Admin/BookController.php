@@ -23,28 +23,26 @@ class BookController extends Controller
     public function store(Request $request)
     {
         $request->validate([
-            'judul' => 'required|string|max:255',
-            'file' => 'required|mimes:pdf|max:10240',
+            'judul' => 'required|max:255',
+            'tahun_terbit' => 'required|numeric|min:1900|max:' . date('Y'),
+            'deskripsi' => 'required',
             'thumbnail' => 'required|image|mimes:jpeg,png,jpg|max:2048',
-            'tahun_terbit' => 'required|integer|min:1900|max:' . date('Y'),
-            'deskripsi' => 'required|string'
+            'file' => 'required|mimes:pdf|max:10240'
         ]);
 
-        $file = $request->file('file');
-        $filePath = $file->store('books', 'public');
-
-        $thumbnail = $request->file('thumbnail');
-        $thumbnailPath = $thumbnail->store('thumbnails', 'public');
+        $thumbnailPath = $request->file('thumbnail')->store('thumbnails', 'public');
+        $pdfPath = $request->file('file')->store('pdfs', 'public');
 
         Book::create([
             'judul' => $request->judul,
-            'file_path' => $filePath,
-            'thumbnail_path' => $thumbnailPath,
             'tahun_terbit' => $request->tahun_terbit,
-            'deskripsi' => $request->deskripsi
+            'deskripsi' => $request->deskripsi,
+            'thumbnail_path' => $thumbnailPath,
+            'file_path' => $pdfPath
         ]);
 
-        return redirect()->route('admin.books.index')->with('success', 'Buku berhasil ditambahkan');
+        return redirect()->route('admin.books.index')
+            ->with('success', 'Buku berhasil ditambahkan.');
     }
 
     public function edit(Book $book)
@@ -55,52 +53,50 @@ class BookController extends Controller
     public function update(Request $request, Book $book)
     {
         $request->validate([
-            'judul' => 'required|string|max:255',
-            'file' => 'nullable|mimes:pdf|max:10240',
+            'judul' => 'required|max:255',
+            'tahun_terbit' => 'required|numeric|min:1900|max:' . date('Y'),
+            'deskripsi' => 'required',
             'thumbnail' => 'nullable|image|mimes:jpeg,png,jpg|max:2048',
-            'tahun_terbit' => 'required|integer|min:1900|max:' . date('Y'),
-            'deskripsi' => 'required|string'
+            'file' => 'nullable|mimes:pdf|max:10240'
         ]);
 
-        $data = [
-            'judul' => $request->judul,
-            'tahun_terbit' => $request->tahun_terbit,
-            'deskripsi' => $request->deskripsi
-        ];
-
-        if ($request->hasFile('file')) {
-            if ($book->file_path) {
-                Storage::disk('public')->delete($book->file_path);
-            }
-            $file = $request->file('file');
-            $data['file_path'] = $file->store('books', 'public');
-        }
+        $data = $request->only(['judul', 'tahun_terbit', 'deskripsi']);
 
         if ($request->hasFile('thumbnail')) {
+            // Hapus thumbnail lama jika ada
             if ($book->thumbnail_path) {
                 Storage::disk('public')->delete($book->thumbnail_path);
             }
-            $thumbnail = $request->file('thumbnail');
-            $data['thumbnail_path'] = $thumbnail->store('thumbnails', 'public');
+            $data['thumbnail_path'] = $request->file('thumbnail')->store('thumbnails', 'public');
+        }
+
+        if ($request->hasFile('file')) {
+            // Hapus file PDF lama jika ada
+            if ($book->file_path) {
+                Storage::disk('public')->delete($book->file_path);
+            }
+            $data['file_path'] = $request->file('file')->store('pdfs', 'public');
         }
 
         $book->update($data);
 
-        return redirect()->route('admin.books.index')->with('success', 'Buku berhasil diperbarui');
+        return redirect()->route('admin.books.index')
+            ->with('success', 'Buku berhasil diperbarui.');
     }
 
     public function destroy(Book $book)
     {
-        if ($book->file_path) {
-            Storage::disk('public')->delete($book->file_path);
-        }
-        
+        // Hapus file terkait
         if ($book->thumbnail_path) {
             Storage::disk('public')->delete($book->thumbnail_path);
+        }
+        if ($book->file_path) {
+            Storage::disk('public')->delete($book->file_path);
         }
 
         $book->delete();
 
-        return redirect()->route('admin.books.index')->with('success', 'Buku berhasil dihapus');
+        return redirect()->route('admin.books.index')
+            ->with('success', 'Buku berhasil dihapus.');
     }
 }
