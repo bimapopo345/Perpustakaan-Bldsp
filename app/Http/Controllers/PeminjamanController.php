@@ -12,12 +12,9 @@ class PeminjamanController extends Controller
     /**
      * Menampilkan form peminjaman buku
      */
-    public function create(Request $request)
+    public function create(Request $request, $id)
     {
-        $bookId = $request->query('id');
-        if (!$bookId) {
-            return redirect()->route('home');
-        }
+        $bookId = $id;
         $book = Book::findOrFail($bookId);
         
         // Cek apakah user sudah meminjam buku ini dan belum dikembalikan
@@ -38,28 +35,22 @@ class PeminjamanController extends Controller
      */
     public function store(Request $request)
     {
-        $request->validate([
+        $validated = $request->validate([
             'book_id' => 'required|exists:books,id',
             'tanggal_pinjam' => 'required|date|after_or_equal:today',
             'durasi' => 'required|integer|min:1|max:7'
         ]);
 
-        $book = Book::findOrFail($request->book_id);
-        
-        // Validasi input
-        $request->validate([
-            'tanggal_pinjam' => 'required|date|after_or_equal:today',
-            'durasi' => 'required|integer|min:1|max:7'
-        ]);
+        $book = Book::findOrFail($validated['book_id']);
         
         // Set tanggal pinjam dan kembali
-        $tanggalPinjam = Carbon::parse($request->tanggal_pinjam);
-        $tanggalKembali = $tanggalPinjam->copy()->addDays($request->durasi);
+        $tanggalPinjam = Carbon::parse($validated['tanggal_pinjam']);
+        $tanggalKembali = $tanggalPinjam->copy()->addDays((int) $validated['durasi']);
         
         // Buat peminjaman baru
         Peminjaman::create([
             'user_id' => auth()->id(),
-            'book_id' => $request->book_id,
+            'book_id' => $validated['book_id'],
             'tanggal_pinjam' => $tanggalPinjam,
             'tanggal_kembali' => $tanggalKembali,
             'status' => 'menunggu'

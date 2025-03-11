@@ -34,7 +34,7 @@ Route::middleware(['auth', 'role:member'])->group(function () {
     // Peminjaman Routes
     Route::get('/peminjaman', [PeminjamanController::class, 'index'])->name('peminjaman.index');
     Route::get('/peminjaman/{id}', [PeminjamanController::class, 'show'])->name('peminjaman.show');
-    Route::get('/book/pinjam', [PeminjamanController::class, 'create'])->name('peminjaman.create');
+    Route::get('/book/pinjam/{id}', [PeminjamanController::class, 'create'])->name('peminjaman.create');
     Route::post('/book/pinjam', [PeminjamanController::class, 'store'])->name('peminjaman.store');
 });
 

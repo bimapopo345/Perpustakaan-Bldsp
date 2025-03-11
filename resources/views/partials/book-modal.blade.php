@@ -15,7 +15,6 @@
                         document.querySelector('#bookDescription').textContent = data.deskripsi;
                         document.querySelector('#readBookBtn').href = data.read_url;
                         document.querySelector('.book-id').value = data.id;
-                        document.querySelector('.borrow-form').action = '/book/pinjam?id=' + data.id;
                         
                         if (data.thumbnail_path) {
                             thumbnail.src = data.thumbnail_path;
@@ -99,8 +98,11 @@
 
                                     @auth
                                         @if(auth()->user()->role === 'member')
-                                            <form method="GET" class="inline borrow-form">
-                                                <input type="hidden" name="id" class="book-id">
+                                            <form method="POST" action="{{ route('peminjaman.store') }}" class="inline borrow-form">
+                                                @csrf
+                                                <input type="hidden" name="book_id" class="book-id">
+                                                <input type="hidden" name="tanggal_pinjam" value="{{ date('Y-m-d') }}">
+                                                <input type="hidden" name="durasi" value="1">
                                                 <button type="submit"
                                                         class="inline-flex items-center px-6 py-3 border border-transparent text-base font-medium 
                                                       rounded-xl text-white bg-gradient-to-r from-green-600 to-teal-600 
