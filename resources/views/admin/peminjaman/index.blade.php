@@ -138,29 +138,19 @@
 <!-- Modal Tolak Peminjaman -->
 <div id="rejectModal" class="fixed inset-0 bg-black bg-opacity-50 hidden items-center justify-center">
     <div class="bg-white rounded-lg p-6 w-96">
-        <h3 class="text-lg font-bold mb-4">Tolak Peminjaman</h3>
-        <form id="rejectForm" action="" method="POST">
+        <h3 class="text-lg font-bold mb-4">Konfirmasi Penolakan</h3>
+        <p class="text-gray-600 mb-4">Apakah Anda yakin ingin menolak peminjaman ini?</p>
+        <form id="rejectForm" action="" method="POST" class="flex justify-end space-x-2">
             @csrf
-            <div class="mb-4">
-                <label class="block text-sm font-medium text-gray-700 mb-2">
-                    Alasan Penolakan
-                </label>
-                <textarea name="catatan" 
-                          rows="3" 
-                          class="w-full rounded-md border-gray-300 shadow-sm focus:border-blue-500 focus:ring-blue-500"
-                          required></textarea>
-            </div>
-            <div class="flex justify-end space-x-2">
-                <button type="button" 
-                        onclick="hideRejectModal()"
-                        class="inline-flex justify-center rounded-md border border-gray-300 bg-white px-4 py-2 text-sm font-medium text-gray-700 shadow-sm hover:bg-gray-50 focus:outline-none focus:ring-2 focus:ring-blue-500 focus:ring-offset-2">
-                    Batal
-                </button>
-                <button type="submit"
-                        class="inline-flex justify-center rounded-md border border-transparent bg-red-600 px-4 py-2 text-sm font-medium text-white shadow-sm hover:bg-red-700 focus:outline-none focus:ring-2 focus:ring-red-500 focus:ring-offset-2">
-                    Tolak
-                </button>
-            </div>
+            <button type="button" 
+                    onclick="hideRejectModal()"
+                    class="inline-flex justify-center rounded-md border border-gray-300 bg-white px-4 py-2 text-sm font-medium text-gray-700 shadow-sm hover:bg-gray-50 focus:outline-none focus:ring-2 focus:ring-blue-500 focus:ring-offset-2">
+                Batal
+            </button>
+            <button type="submit"
+                    class="inline-flex justify-center rounded-md border border-transparent bg-red-600 px-4 py-2 text-sm font-medium text-white shadow-sm hover:bg-red-700 focus:outline-none focus:ring-2 focus:ring-red-500 focus:ring-offset-2">
+                Ya, Tolak
+            </button>
         </form>
     </div>
 </div>
@@ -170,7 +160,7 @@
     function showRejectModal(id) {
         const modal = document.getElementById('rejectModal');
         const form = document.getElementById('rejectForm');
-        form.action = `{{ route('admin.peminjaman.reject', '') }}/${id}`;
+        form.action = "/admin/peminjaman/" + id + "/reject";
         modal.classList.remove('hidden');
         modal.classList.add('flex');
     }

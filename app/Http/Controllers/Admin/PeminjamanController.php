@@ -51,12 +51,8 @@ class PeminjamanController extends Controller
     /**
      * Menolak peminjaman
      */
-    public function reject(Request $request, $id)
+    public function reject($id)
     {
-        $request->validate([
-            'catatan' => 'required|string'
-        ]);
-        
         $peminjaman = Peminjaman::findOrFail($id);
         
         // Hanya bisa reject yang status menunggu
@@ -66,7 +62,6 @@ class PeminjamanController extends Controller
         
         $peminjaman->update([
             'status' => 'ditolak',
-            'catatan' => $request->catatan,
             'approved_by' => auth()->id(),
         ]);
         
