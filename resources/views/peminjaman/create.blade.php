@@ -4,25 +4,43 @@
 <div class="container mx-auto px-4 py-8">
     <div class="max-w-2xl mx-auto">
         <div class="bg-white rounded-lg shadow-md p-6">
-            <h2 class="text-2xl font-bold mb-6">Form Peminjaman Buku</h2>
+            <div class="flex items-center justify-between mb-6">
+                <h2 class="text-2xl font-bold">Form Peminjaman Buku</h2>
+                <a href="{{ url()->previous() }}" 
+                   class="text-gray-600 hover:text-gray-900">
+                    <svg class="w-6 h-6" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                        <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M6 18L18 6M6 6l12 12"/>
+                    </svg>
+                </a>
+            </div>
             
             <!-- Informasi Buku -->
-            <div class="mb-6 p-4 bg-gray-50 rounded-lg">
-                <h3 class="font-semibold mb-2">Informasi Buku</h3>
+            <div class="mb-8 p-4 bg-gray-50 rounded-lg">
+                <h3 class="font-semibold mb-4">Informasi Buku</h3>
                 <div class="flex items-start space-x-4">
                     @if($book->thumbnail_path)
-                        <img src="{{ $book->thumbnail_url }}" alt="{{ $book->judul }}" class="w-24 h-32 object-cover rounded">
+                        <img src="{{ asset('storage/' . $book->thumbnail_path) }}" 
+                             alt="{{ $book->judul }}" 
+                             class="w-24 h-32 object-cover rounded">
+                    @else
+                        <div class="w-24 h-32 bg-gray-200 flex items-center justify-center rounded">
+                            <svg class="w-12 h-12 text-gray-400" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" 
+                                      d="M12 6.253v13m0-13C10.832 5.477 9.246 5 7.5 5S4.168 5.477 3 6.253v13C4.168 18.477 5.754 18 7.5 18s3.332.477 4.5 1.253m0-13C13.168 5.477 14.754 5 16.5 5c1.747 0 3.332.477 4.5 1.253v13C19.832 18.477 18.247 18 16.5 18c-1.746 0-3.332.477-4.5 1.253"/>
+                            </svg>
+                        </div>
                     @endif
                     <div>
-                        <h4 class="font-medium">{{ $book->judul }}</h4>
+                        <h4 class="font-medium text-lg">{{ $book->judul }}</h4>
                         <p class="text-sm text-gray-600">Tahun Terbit: {{ $book->tahun_terbit }}</p>
                     </div>
                 </div>
             </div>
 
             <!-- Form Peminjaman -->
-            <form action="{{ route('peminjaman.store', $book->id) }}" method="POST">
+            <form action="{{ route('peminjaman.store') }}" method="POST">
                 @csrf
+                <input type="hidden" name="book_id" value="{{ $book->id }}">
                 
                 <div class="mb-4">
                     <label for="tanggal_pinjam" class="block text-sm font-medium text-gray-700 mb-1">
@@ -60,20 +78,22 @@
                 </div>
 
                 <!-- Preview Tanggal Kembali -->
-                <div class="mb-6 p-4 bg-gray-50 rounded-lg">
-                    <p class="text-sm text-gray-600">
+                <div class="mb-8 p-4 bg-gray-50 rounded-lg">
+                    <p class="text-sm text-gray-600 mb-2">
                         Tanggal kembali akan dihitung otomatis berdasarkan durasi peminjaman yang dipilih.
+                    </p>
+                    <p class="text-sm font-medium text-gray-900">
                         Maksimal durasi peminjaman adalah 7 hari.
                     </p>
                 </div>
 
-                <div class="flex items-center justify-end space-x-3">
+                <div class="flex justify-end space-x-3">
                     <a href="{{ url()->previous() }}" 
-                       class="inline-flex justify-center rounded-md border border-gray-300 bg-white py-2 px-4 text-sm font-medium text-gray-700 shadow-sm hover:bg-gray-50 focus:outline-none focus:ring-2 focus:ring-blue-500 focus:ring-offset-2">
+                       class="inline-flex justify-center rounded-md border border-gray-300 bg-white px-4 py-2 text-sm font-medium text-gray-700 shadow-sm hover:bg-gray-50 focus:outline-none focus:ring-2 focus:ring-blue-500 focus:ring-offset-2">
                         Batal
                     </a>
                     <button type="submit"
-                            class="inline-flex justify-center rounded-md border border-transparent bg-blue-600 py-2 px-4 text-sm font-medium text-white shadow-sm hover:bg-blue-700 focus:outline-none focus:ring-2 focus:ring-blue-500 focus:ring-offset-2">
+                            class="inline-flex justify-center rounded-md border border-transparent bg-blue-600 px-4 py-2 text-sm font-medium text-white shadow-sm hover:bg-blue-700 focus:outline-none focus:ring-2 focus:ring-blue-500 focus:ring-offset-2">
                         Ajukan Peminjaman
                     </button>
                 </div>
@@ -81,14 +101,4 @@
         </div>
     </div>
 </div>
-
-@push('scripts')
-<script>
-    // Script untuk memvalidasi dan memperbarui tanggal minimum
-    document.addEventListener('DOMContentLoaded', function() {
-        const today = new Date().toISOString().split('T')[0];
-        document.getElementById('tanggal_pinjam').setAttribute('min', today);
-    });
-</script>
-@endpush
 @endsection

@@ -3,138 +3,139 @@
 @section('content')
 <div class="container mx-auto px-4 py-8">
     <div class="max-w-7xl mx-auto">
-        <div class="bg-white rounded-lg shadow-md">
-            <div class="p-6">
-                <div class="flex justify-between items-center mb-6">
-                    <h2 class="text-2xl font-bold">Daftar Peminjaman</h2>
-                    
-                    <!-- Filter Status -->
-                    <div class="flex items-center space-x-2">
-                        <label class="text-sm text-gray-600">Filter:</label>
-                        <select onchange="window.location.href='{{ route('admin.peminjaman.index') }}?status=' + this.value"
-                                class="rounded-md border-gray-300 shadow-sm focus:border-blue-500 focus:ring-blue-500 text-sm">
-                            <option value="semua" {{ $status === 'semua' ? 'selected' : '' }}>Semua Status</option>
-                            <option value="menunggu" {{ $status === 'menunggu' ? 'selected' : '' }}>Menunggu</option>
-                            <option value="disetujui" {{ $status === 'disetujui' ? 'selected' : '' }}>Disetujui</option>
-                            <option value="dipinjam" {{ $status === 'dipinjam' ? 'selected' : '' }}>Dipinjam</option>
-                            <option value="dikembalikan" {{ $status === 'dikembalikan' ? 'selected' : '' }}>Dikembalikan</option>
-                            <option value="ditolak" {{ $status === 'ditolak' ? 'selected' : '' }}>Ditolak</option>
-                            <option value="terlambat" {{ $status === 'terlambat' ? 'selected' : '' }}>Terlambat</option>
-                        </select>
-                    </div>
+        <div class="bg-white rounded-lg shadow-md p-6">
+            <div class="flex items-center justify-between mb-6">
+                <h2 class="text-2xl font-bold">Daftar Peminjaman</h2>
+                <div>
+                    <label class="text-sm text-gray-600">Filter Status:</label>
+                    <select onchange="window.location.href=this.value" class="ml-2 rounded-md border-gray-300 shadow-sm focus:border-blue-500 focus:ring-blue-500">
+                        <option value="{{ route('admin.peminjaman.index', ['status' => 'all']) }}" {{ request('status') === 'all' ? 'selected' : '' }}>Semua</option>
+                        <option value="{{ route('admin.peminjaman.index', ['status' => 'menunggu']) }}" {{ request('status') === 'menunggu' ? 'selected' : '' }}>Menunggu</option>
+                        <option value="{{ route('admin.peminjaman.index', ['status' => 'disetujui']) }}" {{ request('status') === 'disetujui' ? 'selected' : '' }}>Disetujui</option>
+                        <option value="{{ route('admin.peminjaman.index', ['status' => 'dipinjam']) }}" {{ request('status') === 'dipinjam' ? 'selected' : '' }}>Dipinjam</option>
+                        <option value="{{ route('admin.peminjaman.index', ['status' => 'dikembalikan']) }}" {{ request('status') === 'dikembalikan' ? 'selected' : '' }}>Dikembalikan</option>
+                        <option value="{{ route('admin.peminjaman.index', ['status' => 'ditolak']) }}" {{ request('status') === 'ditolak' ? 'selected' : '' }}>Ditolak</option>
+                        <option value="{{ route('admin.peminjaman.index', ['status' => 'terlambat']) }}" {{ request('status') === 'terlambat' ? 'selected' : '' }}>Terlambat</option>
+                    </select>
+                </div>
+            </div>
+
+            @if(session('success'))
+                <div class="mb-6 bg-green-100 border border-green-400 text-green-700 px-4 py-3 rounded-md">
+                    {{ session('success') }}
+                </div>
+            @endif
+
+            @if($peminjaman->isEmpty())
+                <div class="text-center py-8">
+                    <p class="text-gray-500">Tidak ada data peminjaman.</p>
+                </div>
+            @else
+                <div class="overflow-x-auto">
+                    <table class="min-w-full divide-y divide-gray-200">
+                        <thead class="bg-gray-50">
+                            <tr>
+                                <th class="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">
+                                    Member
+                                </th>
+                                <th class="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">
+                                    Buku
+                                </th>
+                                <th class="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">
+                                    Tanggal Pinjam
+                                </th>
+                                <th class="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">
+                                    Tanggal Kembali
+                                </th>
+                                <th class="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">
+                                    Status
+                                </th>
+                                <th class="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">
+                                    Aksi
+                                </th>
+                            </tr>
+                        </thead>
+                        <tbody class="bg-white divide-y divide-gray-200">
+                            @foreach($peminjaman as $pinjam)
+                                <tr>
+                                    <td class="px-6 py-4 whitespace-nowrap">
+                                        <div class="text-sm">
+                                            <p class="font-medium text-gray-900">{{ $pinjam->user->name }}</p>
+                                            <p class="text-gray-500">{{ $pinjam->user->email }}</p>
+                                        </div>
+                                    </td>
+                                    <td class="px-6 py-4 whitespace-nowrap">
+                                        <div class="flex items-center">
+                                            @if($pinjam->book->thumbnail_path)
+                                                <img src="{{ asset('storage/' . $pinjam->book->thumbnail_path) }}" 
+                                                     alt="{{ $pinjam->book->judul }}" 
+                                                     class="w-10 h-14 object-cover rounded mr-3">
+                                            @endif
+                                            <div class="text-sm">
+                                                <p class="font-medium text-gray-900">{{ $pinjam->book->judul }}</p>
+                                                <p class="text-gray-500">Tahun: {{ $pinjam->book->tahun_terbit }}</p>
+                                            </div>
+                                        </div>
+                                    </td>
+                                    <td class="px-6 py-4 whitespace-nowrap text-sm text-gray-500">
+                                        {{ $pinjam->tanggal_pinjam->format('d M Y') }}
+                                    </td>
+                                    <td class="px-6 py-4 whitespace-nowrap text-sm text-gray-500">
+                                        {{ $pinjam->tanggal_kembali->format('d M Y') }}
+                                    </td>
+                                    <td class="px-6 py-4 whitespace-nowrap">
+                                        <span class="px-2 inline-flex text-xs leading-5 font-semibold rounded-full
+                                            {{ $pinjam->status === 'menunggu' ? 'bg-yellow-100 text-yellow-800' : '' }}
+                                            {{ $pinjam->status === 'disetujui' ? 'bg-blue-100 text-blue-800' : '' }}
+                                            {{ $pinjam->status === 'dipinjam' ? 'bg-green-100 text-green-800' : '' }}
+                                            {{ $pinjam->status === 'dikembalikan' ? 'bg-gray-100 text-gray-800' : '' }}
+                                            {{ $pinjam->status === 'ditolak' ? 'bg-red-100 text-red-800' : '' }}
+                                            {{ $pinjam->status === 'terlambat' ? 'bg-red-100 text-red-800' : '' }}">
+                                            {{ ucfirst($pinjam->status) }}
+                                        </span>
+                                    </td>
+                                    <td class="px-6 py-4 whitespace-nowrap text-sm">
+                                        <div class="flex items-center space-x-2">
+                                            @if($pinjam->status === 'menunggu')
+                                                <form action="{{ route('admin.peminjaman.approve', $pinjam->id) }}" method="POST" class="inline">
+                                                    @csrf
+                                                    <button type="submit" class="text-blue-600 hover:text-blue-900">
+                                                        Setujui
+                                                    </button>
+                                                </form>
+                                                <span class="text-gray-300">|</span>
+                                                <button onclick="showRejectModal({{ $pinjam->id }})" 
+                                                        class="text-red-600 hover:text-red-900">
+                                                    Tolak
+                                                </button>
+                                            @endif
+
+                                            @if($pinjam->status === 'dipinjam')
+                                                <form action="{{ route('admin.peminjaman.return', $pinjam->id) }}" method="POST" class="inline">
+                                                    @csrf
+                                                    <button type="submit" class="text-green-600 hover:text-green-900">
+                                                        Konfirmasi Pengembalian
+                                                    </button>
+                                                </form>
+                                            @endif
+                                        </div>
+                                    </td>
+                                </tr>
+                            @endforeach
+                        </tbody>
+                    </table>
                 </div>
 
-                @if($peminjaman->isEmpty())
-                    <div class="text-center py-8">
-                        <p class="text-gray-500">Tidak ada data peminjaman.</p>
-                    </div>
-                @else
-                    <div class="overflow-x-auto">
-                        <table class="min-w-full divide-y divide-gray-200">
-                            <thead class="bg-gray-50">
-                                <tr>
-                                    <th class="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">
-                                        Member
-                                    </th>
-                                    <th class="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">
-                                        Buku
-                                    </th>
-                                    <th class="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">
-                                        Tanggal Pinjam
-                                    </th>
-                                    <th class="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">
-                                        Tanggal Kembali
-                                    </th>
-                                    <th class="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">
-                                        Status
-                                    </th>
-                                    <th class="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">
-                                        Aksi
-                                    </th>
-                                </tr>
-                            </thead>
-                            <tbody class="bg-white divide-y divide-gray-200">
-                                @foreach($peminjaman as $pinjam)
-                                    <tr>
-                                        <td class="px-6 py-4 whitespace-nowrap">
-                                            <div class="text-sm">
-                                                <p class="font-medium text-gray-900">{{ $pinjam->user->name }}</p>
-                                                <p class="text-gray-500">{{ $pinjam->user->email }}</p>
-                                            </div>
-                                        </td>
-                                        <td class="px-6 py-4 whitespace-nowrap">
-                                            <div class="flex items-center">
-                                                @if($pinjam->book->thumbnail_path)
-                                                    <img src="{{ $pinjam->book->thumbnail_url }}" 
-                                                         alt="{{ $pinjam->book->judul }}" 
-                                                         class="w-10 h-14 object-cover rounded mr-3">
-                                                @endif
-                                                <div class="text-sm">
-                                                    <p class="font-medium text-gray-900">{{ $pinjam->book->judul }}</p>
-                                                    <p class="text-gray-500">Tahun: {{ $pinjam->book->tahun_terbit }}</p>
-                                                </div>
-                                            </div>
-                                        </td>
-                                        <td class="px-6 py-4 whitespace-nowrap text-sm text-gray-500">
-                                            {{ $pinjam->tanggal_pinjam->format('d M Y') }}
-                                        </td>
-                                        <td class="px-6 py-4 whitespace-nowrap text-sm text-gray-500">
-                                            {{ $pinjam->tanggal_kembali->format('d M Y') }}
-                                        </td>
-                                        <td class="px-6 py-4 whitespace-nowrap">
-                                            <span class="px-2 inline-flex text-xs leading-5 font-semibold rounded-full
-                                                {{ $pinjam->status === 'menunggu' ? 'bg-yellow-100 text-yellow-800' : '' }}
-                                                {{ $pinjam->status === 'disetujui' ? 'bg-blue-100 text-blue-800' : '' }}
-                                                {{ $pinjam->status === 'dipinjam' ? 'bg-green-100 text-green-800' : '' }}
-                                                {{ $pinjam->status === 'dikembalikan' ? 'bg-gray-100 text-gray-800' : '' }}
-                                                {{ $pinjam->status === 'ditolak' ? 'bg-red-100 text-red-800' : '' }}
-                                                {{ $pinjam->status === 'terlambat' ? 'bg-red-100 text-red-800' : '' }}">
-                                                {{ ucfirst($pinjam->status) }}
-                                            </span>
-                                        </td>
-                                        <td class="px-6 py-4 whitespace-nowrap text-sm">
-                                            <div class="flex items-center space-x-2">
-                                                @if($pinjam->status === 'menunggu')
-                                                    <form action="{{ route('admin.peminjaman.approve', $pinjam->id) }}" method="POST" class="inline">
-                                                        @csrf
-                                                        <button type="submit" class="text-blue-600 hover:text-blue-900">
-                                                            Setujui
-                                                        </button>
-                                                    </form>
-                                                    <span class="text-gray-300">|</span>
-                                                    <button onclick="showRejectModal({{ $pinjam->id }})" 
-                                                            class="text-red-600 hover:text-red-900">
-                                                        Tolak
-                                                    </button>
-                                                @endif
-
-                                                @if($pinjam->status === 'dipinjam')
-                                                    <form action="{{ route('admin.peminjaman.return', $pinjam->id) }}" method="POST" class="inline">
-                                                        @csrf
-                                                        <button type="submit" class="text-green-600 hover:text-green-900">
-                                                            Konfirmasi Kembali
-                                                        </button>
-                                                    </form>
-                                                @endif
-                                            </div>
-                                        </td>
-                                    </tr>
-                                @endforeach
-                            </tbody>
-                        </table>
-                    </div>
-
-                    <!-- Pagination -->
-                    <div class="mt-4">
-                        {{ $peminjaman->links() }}
-                    </div>
-                @endif
-            </div>
+                <!-- Pagination -->
+                <div class="mt-4">
+                    {{ $peminjaman->links() }}
+                </div>
+            @endif
         </div>
     </div>
 </div>
 
-<!-- Modal Reject -->
+<!-- Modal Tolak Peminjaman -->
 <div id="rejectModal" class="fixed inset-0 bg-black bg-opacity-50 hidden items-center justify-center">
     <div class="bg-white rounded-lg p-6 w-96">
         <h3 class="text-lg font-bold mb-4">Tolak Peminjaman</h3>
