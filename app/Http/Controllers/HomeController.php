@@ -34,6 +34,7 @@ class HomeController extends Controller
             'thumbnail_path' => $book->thumbnail_path ? asset('storage/' . $book->thumbnail_path) : null,
             'read_url' => route('books.read', $book->id),
             'file_path' => route('books.view-pdf', $book->id),
+            'pinjam_url' => route('peminjaman.create', $book->id),
         ]);
     }
 }

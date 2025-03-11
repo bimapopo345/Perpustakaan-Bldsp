@@ -2,6 +2,8 @@
 
 use App\Http\Controllers\Admin\BookController as AdminBookController;
 use App\Http\Controllers\Admin\MemberController as AdminMemberController;
+use App\Http\Controllers\Admin\PeminjamanController as AdminPeminjamanController;
+use App\Http\Controllers\PeminjamanController;
 use App\Http\Controllers\Auth\LoginController;
 use App\Http\Controllers\Auth\RegisterController;
 use App\Http\Controllers\BookController;
@@ -28,6 +30,12 @@ Route::middleware('guest')->group(function () {
 // Member Routes
 Route::middleware(['auth', 'role:member'])->group(function () {
     Route::get('/member/dashboard', [MemberController::class, 'dashboard'])->name('member.dashboard');
+    
+    // Peminjaman Routes
+    Route::get('/peminjaman', [PeminjamanController::class, 'index'])->name('peminjaman.index');
+    Route::get('/peminjaman/{id}', [PeminjamanController::class, 'show'])->name('peminjaman.show');
+    Route::get('/book/pinjam', [PeminjamanController::class, 'create'])->name('peminjaman.create');
+    Route::post('/book/pinjam', [PeminjamanController::class, 'store'])->name('peminjaman.store');
 });
 
 Route::post('/logout', [LoginController::class, 'logout'])
@@ -49,4 +57,10 @@ Route::middleware(['auth', 'role:admin'])
 
         Route::resource('books', AdminBookController::class);
         Route::get('/members', [AdminMemberController::class, 'index'])->name('members.index');
+        
+        // Admin Peminjaman Routes
+        Route::get('/peminjaman', [AdminPeminjamanController::class, 'index'])->name('peminjaman.index');
+        Route::post('/peminjaman/{id}/approve', [AdminPeminjamanController::class, 'approve'])->name('peminjaman.approve');
+        Route::post('/peminjaman/{id}/reject', [AdminPeminjamanController::class, 'reject'])->name('peminjaman.reject');
+        Route::post('/peminjaman/{id}/return', [AdminPeminjamanController::class, 'return'])->name('peminjaman.return');
     });

@@ -45,6 +45,10 @@
                            class="border-transparent text-gray-500 hover:border-gray-300 hover:text-gray-700 inline-flex items-center px-1 pt-1 border-b-2 text-sm font-medium">
                             Kelola Member
                         </a>
+                        <a href="{{ route('admin.peminjaman.index') }}"
+                           class="border-transparent text-gray-500 hover:border-gray-300 hover:text-gray-700 inline-flex items-center px-1 pt-1 border-b-2 text-sm font-medium">
+                            Kelola Peminjaman
+                        </a>
                         <a href="{{ route('home') }}" 
                            class="border-transparent text-gray-500 hover:border-gray-300 hover:text-gray-700 inline-flex items-center px-1 pt-1 border-b-2 text-sm font-medium">
                             Lihat Website
@@ -143,8 +147,39 @@
                 </div>
             </div>
 
-            <!-- Quick Actions Card -->
+            <!-- Total Peminjaman Card -->
             <div class="bg-white overflow-hidden rounded-2xl shadow-xl card-hover">
+                <div class="p-6">
+                    <div class="flex items-center">
+                        <div class="flex-shrink-0 p-3 rounded-lg bg-green-500">
+                            <svg class="h-8 w-8 text-white" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" 
+                                      d="M9 5H7a2 2 0 00-2 2v12a2 2 0 002 2h10a2 2 0 002-2V7a2 2 0 00-2-2h-2M9 5a2 2 0 002 2h2a2 2 0 002-2M9 5a2 2 0 012-2h2a2 2 0 012 2m-6 9l2 2 4-4"></path>
+                            </svg>
+                        </div>
+                        <div class="ml-5 w-0 flex-1">
+                            <dl>
+                                <dt class="text-sm font-medium text-gray-500 truncate">Total Peminjaman</dt>
+                                <dd class="text-3xl font-bold text-gray-900">{{ \App\Models\Peminjaman::count() }}</dd>
+                            </dl>
+                        </div>
+                    </div>
+                </div>
+                <div class="bg-gray-50 px-5 py-3">
+                    <div class="text-sm">
+                        <a href="{{ route('admin.peminjaman.index') }}" 
+                           class="font-medium text-green-600 hover:text-green-500 inline-flex items-center">
+                            Lihat semua peminjaman
+                            <svg class="ml-2 w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 5l7 7-7 7" />
+                            </svg>
+                        </a>
+                    </div>
+                </div>
+            </div>
+
+            <!-- Quick Actions Card -->
+            <div class="bg-white overflow-hidden rounded-2xl shadow-xl card-hover mt-5 sm:mt-0">
                 <div class="p-6">
                     <h3 class="text-lg font-medium text-gray-900 mb-4">Aksi Cepat</h3>
                     <a href="{{ route('admin.books.create') }}" 
