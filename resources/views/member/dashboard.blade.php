@@ -58,7 +58,7 @@
         </div>
 
         <!-- Stats Grid -->
-        <div class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-8">
+        <div class="grid grid-cols-1 md:grid-cols-3 gap-8 mb-8">
             <!-- Books Card -->
             <div class="bg-white rounded-2xl shadow-xl overflow-hidden card-hover">
                 <div class="p-8">
@@ -77,6 +77,26 @@
                             <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 5l7 7-7 7"></path>
                         </svg>
                     </a>
+                </div>
+            </div>
+
+            <!-- Active Borrowing Card -->
+            <div class="bg-white rounded-2xl shadow-xl overflow-hidden card-hover">
+                <div class="p-8">
+                    <div class="flex items-center justify-between mb-4">
+                        <h3 class="text-xl font-semibold text-gray-800">Peminjaman Aktif</h3>
+                        <div class="bg-green-500 text-white p-3 rounded-lg">
+                            <svg class="w-6 h-6" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 5H7a2 2 0 00-2 2v12a2 2 0 002 2h10a2 2 0 002-2V7a2 2 0 00-2-2h-2M9 5a2 2 0 002 2h2a2 2 0 002-2M9 5a2 2 0 012-2h2a2 2 0 012 2m-6 9l2 2 4-4"></path>
+                            </svg>
+                        </div>
+                    </div>
+                    <p class="text-3xl font-bold text-gray-900 mb-4">
+                        {{ \App\Models\Peminjaman::where('user_id', auth()->id())
+                            ->whereIn('status', ['menunggu', 'disetujui', 'dipinjam'])
+                            ->count() }}
+                    </p>
+                    <span class="text-gray-600">Buku sedang dalam proses peminjaman</span>
                 </div>
             </div>
 
@@ -100,6 +120,69 @@
                             </span>
                         </div>
                     </div>
+                </div>
+            </div>
+        </div>
+
+        <!-- Peminjaman List -->
+        <div class="bg-white rounded-2xl shadow-xl overflow-hidden">
+            <div class="p-6">
+                <h3 class="text-xl font-semibold text-gray-800 mb-4">Riwayat Peminjaman</h3>
+                <div class="overflow-x-auto">
+                    <table class="min-w-full divide-y divide-gray-200">
+                        <thead class="bg-gray-50">
+                            <tr>
+                                <th class="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">Judul Buku</th>
+                                <th class="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">Tanggal Pinjam</th>
+                                <th class="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">Tanggal Kembali</th>
+                                <th class="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">Status</th>
+                            </tr>
+                        </thead>
+                        <tbody class="bg-white divide-y divide-gray-200">
+                            @forelse(\App\Models\Peminjaman::with('book')->where('user_id', auth()->id())->latest()->get() as $peminjaman)
+                                <tr>
+                                    <td class="px-6 py-4 whitespace-nowrap text-sm font-medium text-gray-900">
+                                        {{ $peminjaman->book->judul }}
+                                    </td>
+                                    <td class="px-6 py-4 whitespace-nowrap text-sm text-gray-500">
+                                        {{ $peminjaman->tanggal_pinjam->format('d M Y') }}
+                                    </td>
+                                    <td class="px-6 py-4 whitespace-nowrap text-sm text-gray-500">
+                                        {{ $peminjaman->tanggal_kembali->format('d M Y') }}
+                                    </td>
+                                    <td class="px-6 py-4 whitespace-nowrap">
+                                        @if($peminjaman->status === 'menunggu')
+                                            <span class="px-2 inline-flex text-xs leading-5 font-semibold rounded-full bg-yellow-100 text-yellow-800">
+                                                Menunggu Persetujuan
+                                            </span>
+                                        @elseif($peminjaman->status === 'disetujui')
+                                            <span class="px-2 inline-flex text-xs leading-5 font-semibold rounded-full bg-green-100 text-green-800">
+                                                Disetujui
+                                            </span>
+                                        @elseif($peminjaman->status === 'ditolak')
+                                            <span class="px-2 inline-flex text-xs leading-5 font-semibold rounded-full bg-red-100 text-red-800">
+                                                Ditolak
+                                            </span>
+                                        @elseif($peminjaman->status === 'dipinjam')
+                                            <span class="px-2 inline-flex text-xs leading-5 font-semibold rounded-full bg-blue-100 text-blue-800">
+                                                Sedang Dipinjam
+                                            </span>
+                                        @elseif($peminjaman->status === 'dikembalikan')
+                                            <span class="px-2 inline-flex text-xs leading-5 font-semibold rounded-full bg-gray-100 text-gray-800">
+                                                Dikembalikan
+                                            </span>
+                                        @endif
+                                    </td>
+                                </tr>
+                            @empty
+                                <tr>
+                                    <td colspan="4" class="px-6 py-4 text-center text-sm text-gray-500">
+                                        Belum ada riwayat peminjaman
+                                    </td>
+                                </tr>
+                            @endforelse
+                        </tbody>
+                    </table>
                 </div>
             </div>
         </div>
