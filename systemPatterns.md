@@ -1,125 +1,276 @@
-# System Patterns & Optimization Strategies
+# Pola Sistem (System Patterns)
 
-## 1. API Response Chunking
+## Struktur Routing
 
-### Pattern
+### Public Routes
+
+```php
+// Akses tanpa login
+Route::get('/', [HomeController::class, 'index']);
+Route::get('/book/{id}', [HomeController::class, 'show']);
+Route::get('/book/{id}/read', [BookController::class, 'read']);
+Route::get('/book/{id}/pdf', [BookController::class, 'viewPdf']);
+```
+
+### Authentication Routes
+
+```php
+Route::middleware('guest')->group(function () {
+    // Login Routes
+    Route::get('/login', [LoginController::class, 'showLoginForm']);
+    Route::post('/login', [LoginController::class, 'login']);
+
+    // Register Routes
+    Route::get('/register', [RegisterController::class, 'showRegistrationForm']);
+    Route::post('/register', [RegisterController::class, 'register']);
+});
+```
+
+### Member Routes
+
+```php
+Route::middleware(['auth', 'role:member'])->group(function () {
+    // Dashboard
+    Route::get('/member/dashboard', [MemberController::class, 'dashboard']);
+
+    // Peminjaman Management
+    Route::get('/peminjaman', [PeminjamanController::class, 'index']);
+    Route::get('/peminjaman/{id}', [PeminjamanController::class, 'show']);
+    Route::get('/book/pinjam/{id}', [PeminjamanController::class, 'create']);
+    Route::post('/book/pinjam', [PeminjamanController::class, 'store']);
+});
+```
+
+### Admin Routes
+
+```php
+Route::middleware(['auth', 'role:admin'])
+    ->prefix('admin')
+    ->name('admin.')
+    ->group(function () {
+        // Dashboard
+        Route::get('/dashboard', 'dashboard');
+
+        // Resource Routes
+        Route::resource('books', AdminBookController::class);
+        Route::get('/members', [AdminMemberController::class, 'index']);
+
+        // Peminjaman Management
+        Route::get('/peminjaman', [AdminPeminjamanController::class, 'index']);
+        Route::post('/peminjaman/{id}/approve', [AdminPeminjamanController::class, 'approve']);
+        Route::post('/peminjaman/{id}/reject', [AdminPeminjamanController::class, 'reject']);
+        Route::post('/peminjaman/{id}/return', [AdminPeminjamanController::class, 'return']);
+    });
+```
+
+## Authentication Pattern
+
+### Role-Based Access Control (RBAC)
+
+```php
+class CheckRole
+{
+    public function handle(Request $request, Closure $next, string $role): Response
+    {
+        if (!$request->user() || $request->user()->role !== $role) {
+            return redirect('/');
+        }
+        return $next($request);
+    }
+}
+```
+
+### Role Types
+
+1. **Guest**
+
+    - Dapat melihat daftar buku
+    - Dapat membaca detail buku
+    - Dapat melihat PDF buku
+    - Dapat register/login
+
+2. **Member**
+
+    - Semua akses guest
+    - Dapat mengajukan peminjaman
+    - Dapat melihat status peminjaman
+    - Dapat melihat history peminjaman
+
+3. **Admin**
+    - Manajemen buku (CRUD)
+    - Manajemen member
+    - Approval peminjaman
+    - Konfirmasi pengembalian
+
+## Flow Pattern
+
+### Flow Peminjaman Buku
 
 ```mermaid
 sequenceDiagram
-    Client->>+Server: Request Data
-    Server->>+Database: Query Data
-    Database-->>-Server: Large Dataset
-    loop Chunking Process
-        Server->>Client: Send Data Chunk (max 1MB)
+    participant M as Member
+    participant S as System
+    participant A as Admin
+
+    M->>S: Pilih Buku
+    M->>S: Ajukan Peminjaman
+    S->>S: Status "menunggu"
+    S->>A: Notifikasi Peminjaman Baru
+
+    A->>S: Review Peminjaman
+    alt Disetujui
+        A->>S: Approve Peminjaman
+        S->>S: Status "disetujui"
+        M->>S: Ambil Buku
+        S->>S: Status "dipinjam"
+        Note over M,S: Masa Peminjaman Berjalan
+        alt Tepat Waktu
+            M->>S: Kembalikan Buku
+            A->>S: Konfirmasi Return
+            S->>S: Status "dikembalikan"
+        else Terlambat
+            S->>S: Status "terlambat"
+            M->>S: Kembalikan Buku
+            A->>S: Konfirmasi Return
+            S->>S: Status "dikembalikan"
+        end
+    else Ditolak
+        A->>S: Reject Peminjaman
+        S->>S: Status "ditolak"
     end
 ```
 
-### Implementasi
+## Service Pattern
 
-1. Pagination default untuk semua list data
-2. Streaming response untuk file besar
-3. Lazy loading untuk data yang tidak urgent
+### File Management Service
 
-## 2. PDF Optimization
+1. **Upload Pattern**
 
-### Pattern
+    - Validasi file (size, type, extension)
+    - Generate secure filename
+    - Save ke storage
+    - Create public symlink
 
-```mermaid
-sequenceDiagram
-    participant C as Client
-    participant S as Server
-    participant CD as Cache/CDN
+2. **Access Pattern**
+    - Validasi existence
+    - Security headers
+    - Streaming response
 
-    C->>S: Request PDF
-    alt Cache Hit
-        S->>CD: Check Cache
-        CD-->>C: Return Cached Chunk
-    else Cache Miss
-        S->>S: Process PDF
-        S->>CD: Store in Cache
-        S-->>C: Stream PDF Chunk
-    end
+### Database Access Pattern
+
+1. **Model Relations**
+
+    ```php
+    // Peminjaman -> User
+    public function user() {
+        return $this->belongsTo(User::class);
+    }
+
+    // Peminjaman -> Book
+    public function book() {
+        return $this->belongsTo(Book::class);
+    }
+
+    // Peminjaman -> Admin
+    public function approver() {
+        return $this->belongsTo(User::class, 'approved_by');
+    }
+    ```
+
+2. **Query Pattern**
+    - Eager loading untuk relasi
+    - Pagination untuk list
+    - Scoped queries
+
+## Error Handling Pattern
+
+### HTTP Errors
+
+-   404: Resource tidak ditemukan
+-   403: Unauthorized access
+-   401: Unauthenticated
+-   422: Validation error
+
+### Business Logic Errors
+
+1. **Peminjaman**
+
+    - Duplikasi peminjaman
+    - Invalid status transition
+    - File tidak ditemukan
+
+2. **Upload**
+    - Invalid file type
+    - File size exceeded
+    - Storage error
+
+### Error Response Pattern
+
+```php
+return redirect()
+    ->back()
+    ->with('error', 'Error message here');
 ```
 
-### Strategi
+## Success Response Pattern
 
-1. Streaming PDF by chunks
-2. Caching PDF segments
-3. Progressive loading
-4. Compression untuk storage
-
-## 3. Database Query Optimization
-
-### Pattern
-
-```mermaid
-flowchart TD
-    A[Query Request] --> B{Cache?}
-    B -->|Yes| C[Return Cache]
-    B -->|No| D[Execute Query]
-    D --> E[Store Cache]
-    E --> F[Return Data]
+```php
+return redirect()
+    ->route('route.name')
+    ->with('success', 'Success message here');
 ```
 
-### Implementasi
+## Validation Pattern
 
-1. Indexing untuk kolom yang sering dicari
-2. Eager loading untuk relasi
-3. Caching untuk query yang sering diakses
-4. Chunking untuk query dengan dataset besar
+### Request Validation
 
-## 4. Notification System
-
-### Pattern
-
-```mermaid
-flowchart LR
-    A[Event Trigger] --> B[Queue Job]
-    B --> C{Type?}
-    C -->|Real-time| D[WebSocket]
-    C -->|Async| E[Database]
-    C -->|Background| F[Cache]
+```php
+$request->validate([
+    'field' => 'validation|rules',
+]);
 ```
 
-### Implementasi
+### Custom Validation Rules
 
-1. Queue untuk proses background
-2. Batch processing untuk notifikasi massal
-3. Caching untuk notifikasi yang sering diakses
+1. **File Upload**
 
-## 5. Security Patterns
+    - Size limits
+    - Allowed types
+    - File existence
 
-### Access Control
+2. **Peminjaman**
+    - Date validation
+    - Status transitions
+    - Duplicate check
 
-```mermaid
-flowchart TD
-    A[Request] --> B{Auth?}
-    B -->|Yes| C{Role?}
-    B -->|No| D[Login]
-    C -->|Admin| E[Admin Access]
-    C -->|Member| F[Member Access]
-```
+## Security Pattern
 
-### File Protection
+### Route Protection
 
-1. Signed URLs untuk akses file
-2. Rate limiting per user
-3. Validation untuk semua input
-4. Sanitasi output
+1. **Authentication Check**
 
-## 6. Performance Metrics
+    ```php
+    Route::middleware('auth')->group(function () {
+        // Protected routes
+    });
+    ```
 
-### Monitoring Points
+2. **Role Check**
+    ```php
+    Route::middleware(['auth', 'role:admin'])->group(function () {
+        // Admin only routes
+    });
+    ```
 
--   API Response Time
--   Memory Usage
--   Query Execution Time
--   Cache Hit Ratio
--   Error Rates
+### File Access Protection
 
-### Logging Strategy
+1. **Private Storage**
 
-1. Error logging dengan detail
-2. Performance logging untuk optimasi
-3. Security logging untuk audit
-4. User activity logging
+    - Files stored outside public directory
+    - Access through controller only
+    - Symlink untuk public access
+
+2. **Download Protection**
+    - Secure headers
+    - Mime type validation
+    - Auth check sebelum download

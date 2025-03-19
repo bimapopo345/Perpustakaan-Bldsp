@@ -1,213 +1,233 @@
-# Dokumentasi Proyek Perpustakaan Digital
+# Konteks Produk Perpustakaan Digital
 
-## Struktur File dan Direktori
+## Overview Produk
 
-### Root Directory
+Perpustakaan Digital adalah platform modern untuk manajemen dan akses buku digital yang memungkinkan pengguna untuk mencari, membaca, dan meminjam buku secara online. Sistem ini dirancang untuk memudahkan akses ke pengetahuan sambil mempertahankan kontrol dan tracking yang baik atas penggunaan sumber daya perpustakaan.
 
-```
-├── app/
-│   ├── Http/
-│   │   ├── Controllers/
-│   │   │   ├── Admin/
-│   │   │   │   ├── BookController.php
-│   │   │   │   ├── MemberController.php
-│   │   │   │   └── PeminjamanController.php
-│   │   │   ├── Auth/
-│   │   │   │   ├── LoginController.php
-│   │   │   │   └── RegisterController.php
-│   │   │   ├── BookController.php
-│   │   │   ├── Controller.php
-│   │   │   ├── HomeController.php
-│   │   │   ├── MemberController.php
-│   │   │   └── PeminjamanController.php
-│   │   ├── Middleware/
-│   │   │   ├── Authenticate.php
-│   │   │   ├── CheckRole.php
-│   │   │   └── RedirectIfAuthenticated.php
-│   │   └── Kernel.php
-│   ├── Models/
-│   │   ├── Book.php
-│   │   ├── Peminjaman.php
-│   │   └── User.php
-│   └── Providers/
-│       └── AppServiceProvider.php
-├── database/
-│   ├── migrations/
-│   │   ├── 0001_01_01_000000_create_users_table.php
-│   │   ├── 0001_01_01_000001_create_cache_table.php
-│   │   ├── 0001_01_01_000002_create_jobs_table.php
-│   │   ├── 2024_03_10_000001_create_books_table.php
-│   │   ├── 2025_03_10_130741_add_role_to_users_table.php
-│   │   └── 2025_03_11_030449_create_peminjaman_table.php
-│   └── seeders/
-│       ├── AdminSeeder.php
-│       └── DatabaseSeeder.php
-├── resources/
-│   ├── css/
-│   │   └── app.css
-│   ├── js/
-│   │   ├── app.js
-│   │   └── bootstrap.js
-│   └── views/
-│       ├── admin/
-│       │   ├── dashboard.blade.php
-│       │   ├── books/
-│       │   │   ├── create.blade.php
-│       │   │   ├── edit.blade.php
-│       │   │   └── index.blade.php
-│       │   ├── members/
-│       │   │   └── index.blade.php
-│       │   └── peminjaman/
-│       │       └── index.blade.php
-│       ├── auth/
-│       │   ├── login.blade.php
-│       │   └── register.blade.php
-│       ├── books/
-│       │   └── read.blade.php
-│       ├── layouts/
-│       │   └── app.blade.php
-│       ├── member/
-│       │   └── dashboard.blade.php
-│       ├── partials/
-│       │   └── book-modal.blade.php
-│       ├── peminjaman/
-│       │   ├── create.blade.php
-│       │   └── index.blade.php
-│       └── welcome.blade.php
-└── routes/
-    ├── web.php
-    └── console.php
+## User Interface
+
+### 1. Landing Page
+
+```mermaid
+graph TD
+    A[Hero Section] --> B[Search Bar]
+    A --> C[Navigation Menu]
+    B --> D[Hasil Pencarian]
+    D --> E[Grid Buku]
+    E --> F[Detail Modal]
 ```
 
-## Deskripsi Komponen Utama
+#### Komponen UI
 
-### 1. Controllers
+-   **Hero Section**
 
--   **Admin/BookController**: Manajemen buku oleh admin (CRUD)
--   **Admin/MemberController**: Manajemen anggota perpustakaan
--   **Admin/PeminjamanController**: Approval peminjaman, retur buku
--   **BookController**: Menampilkan dan membaca buku
--   **PeminjamanController**: Request peminjaman buku
+    -   Gradient background animasi
+    -   Headline "Jelajahi Dunia Pengetahuan"
+    -   Search bar dengan efek glass-morphism
+    -   Floating decorative elements
 
-### 2. Models
+-   **Navigation**
 
--   **Book**: Model untuk data buku
--   **Peminjaman**: Model untuk transaksi peminjaman
--   **User**: Model untuk data pengguna dan admin
+    -   Logo/Brand
+    -   Login/Register untuk guest
+    -   Dashboard akses untuk user
+    -   Logout untuk user aktif
 
-### 3. Views
+-   **Book Grid**
+    -   Responsive grid layout (1-4 kolom)
+    -   Card dengan hover effects
+    -   Thumbnail buku dengan fallback
+    -   Informasi dasar (judul, tahun, deskripsi)
 
--   **admin/\***: Interface admin untuk manajemen
--   **auth/\***: Halaman login dan register
--   **books/\***: Tampilan buku dan reader
--   **peminjaman/\***: Form dan list peminjaman
--   **layouts & partials**: Template dan komponen reusable
+### 2. Fitur Visual
 
-### 4. Database
+-   Animasi gradient background
+-   Hover effects pada cards
+-   Glass-morphism effects
+-   Floating animations
+-   Responsive design
+-   Modal windows untuk detail
+-   Image thumbnails dengan fallback
 
-#### Users Table
+## User Journey
 
-```sql
-CREATE TABLE users (
-    id bigint primary key,
-    name varchar(255),
-    email varchar(255) unique,
-    password varchar(255),
-    role enum('admin','member'),
-    timestamps
-);
+### 1. Guest User Flow
+
+```mermaid
+graph LR
+    A[Landing Page] --> B[Browse Books]
+    B --> C[View Details]
+    C --> D[Register/Login]
+    D --> E[Borrow Book]
 ```
 
-#### Books Table
+### 2. Member Flow
 
-```sql
-CREATE TABLE books (
-    id bigint primary key,
-    judul varchar(255),
-    tahun_terbit year,
-    deskripsi text,
-    thumbnail_path varchar(255),
-    file_path varchar(255),
-    timestamps
-);
+```mermaid
+graph LR
+    A[Login] --> B[Browse Books]
+    B --> C[View Details]
+    C --> D[Request Borrow]
+    D --> E[Track Status]
+    E --> F[Read Book]
 ```
 
-#### Peminjaman Table
+### 3. Admin Flow
 
-```sql
-CREATE TABLE peminjaman (
-    id bigint primary key,
-    user_id bigint foreign key,
-    book_id bigint foreign key,
-    tanggal_pinjam datetime,
-    tanggal_kembali datetime,
-    tanggal_dikembalikan datetime null,
-    status enum('menunggu','disetujui','dipinjam','dikembalikan','terlambat','ditolak'),
-    catatan text null,
-    approved_by bigint foreign key null,
-    timestamps
-);
+```mermaid
+graph LR
+    A[Login] --> B[Dashboard]
+    B --> C[Manage Books]
+    B --> D[Manage Users]
+    B --> E[Process Requests]
 ```
 
-## Routes dan Endpoints
+## Fitur Utama
 
-### Public Routes
+### 1. Pencarian & Katalog
 
--   `GET /`: Homepage
--   `GET /book/{id}`: Detail buku
--   `GET /book/{id}/read`: Baca buku
--   `GET /book/{id}/pdf`: View PDF buku
+-   Search bar responsif
+-   Filter berdasarkan judul dan deskripsi
+-   Grid view dengan pagination
+-   Preview thumbnail dan deskripsi
+-   Modal detail buku
 
-### Auth Routes
+### 2. Manajemen Buku
 
--   `GET/POST /login`: Form login dan proses
--   `GET/POST /register`: Form register dan proses
--   `POST /logout`: Logout user
+-   Upload buku digital (PDF)
+-   Upload thumbnail
+-   Metadata management
+-   File preview system
+-   Secure file storage
 
-### Member Routes (auth & role:member)
+### 3. Sistem Peminjaman
 
--   `GET /member/dashboard`: Dashboard member
--   `GET /peminjaman`: List peminjaman user
--   `GET /peminjaman/{id}`: Detail peminjaman
--   `GET/POST /book/pinjam/{id}`: Form dan proses peminjaman
+-   Request peminjaman
+-   Approval workflow
+-   Status tracking
+-   Durasi peminjaman
+-   Pengembalian otomatis
 
-### Admin Routes (auth & role:admin)
+### 4. User Management
 
--   `GET /admin/dashboard`: Dashboard admin
--   Resource routes untuk books
--   `GET /admin/members`: List member
--   `GET /admin/peminjaman`: List semua peminjaman
--   `POST /admin/peminjaman/{id}/approve`: Approve peminjaman
--   `POST /admin/peminjaman/{id}/reject`: Reject peminjaman
--   `POST /admin/peminjaman/{id}/return`: Catat pengembalian
+-   Role-based access
+-   Member registration
+-   Profile management
+-   Activity history
+-   Admin dashboard
 
-## Status Development
+## User Experience Design
 
-### Fitur yang Sudah Ada
+### 1. Visual Hierarchy
 
-1. Autentikasi & Autorisasi
-2. Manajemen Buku (CRUD)
-3. Sistem Peminjaman Dasar
-4. PDF Reader
-5. Role Based Access
+-   Clean, modern interface
+-   Clear call-to-actions
+-   Visual feedback pada interaksi
+-   Consistent branding elements
+-   Responsive layouts
 
-### Yang Perlu Dikembangkan
+### 2. Navigation Pattern
 
-1. Optimasi Response:
+-   Intuitive menu structure
+-   Breadcrumb navigation
+-   Modal-based detail views
+-   Dashboard organization
+-   Clear status indicators
 
-    - Chunking untuk response besar
-    - Caching untuk query populer
-    - Streaming untuk file PDF
+### 3. Feedback System
 
-2. Peningkatan Fitur:
+-   Success/error messages
+-   Status updates
+-   Loading indicators
+-   Confirmation dialogs
+-   Form validation
 
-    - Sistem notifikasi
-    - Advanced search
-    - Dashboard reporting
-    - Batch processing
+## Content Strategy
 
-3. Peningkatan Keamanan:
-    - Rate limiting
-    - File access protection
-    - Input validation
-    - Error handling
+### 1. Buku Digital
+
+-   Thumbnail visual
+-   Metadata terstruktur
+-   Preview konten
+-   Download controls
+-   Access restrictions
+
+### 2. User Generated Content
+
+-   Peminjaman requests
+-   Status updates
+-   Activity logs
+-   User profiles
+-   Admin notes
+
+## Performance Considerations
+
+### 1. Loading Optimization
+
+-   Lazy loading images
+-   Pagination implementasi
+-   Modal-based detail loading
+-   Efficient search queries
+-   Caching strategies
+
+### 2. User Experience
+
+-   Smooth animations
+-   Responsive interactions
+-   Quick search results
+-   Fast page loads
+-   Minimal loading states
+
+## Security Features
+
+### 1. Access Control
+
+-   Role-based permissions
+-   Session management
+-   Secure file access
+-   Protected routes
+-   Rate limiting
+
+### 2. Data Protection
+
+-   Secure file storage
+-   Encrypted connections
+-   Protected user data
+-   Safe file handling
+-   Audit logging
+
+## Monitoring & Analytics
+
+### 1. User Behavior
+
+-   Popular books
+-   Search patterns
+-   Usage statistics
+-   User engagement
+-   Peak usage times
+
+### 2. System Health
+
+-   Error tracking
+-   Performance metrics
+-   Resource usage
+-   Security events
+-   API reliability
+
+## Future Enhancements
+
+### 1. Planned Features
+
+-   Rating system
+-   User reviews
+-   Mobile app
+-   Advanced search
+-   Recommendation engine
+
+### 2. Potential Improvements
+
+-   Multi-language support
+-   Social features
+-   Reading progress tracking
+-   Notification system
+-   Integration dengan e-reader

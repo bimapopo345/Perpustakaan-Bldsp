@@ -1,213 +1,207 @@
-# Technical Context & Implementation Details
+# Konteks Teknis Proyek
 
-## Stack Teknologi
+## Tech Stack
 
-### Backend Framework
+### Backend
 
--   Laravel 12.0
-    -   PHP 8.2+
-    -   Composer untuk package management
-    -   Laravel Queue untuk background jobs
-    -   Laravel Cache untuk caching
-
-### Database
-
--   MySQL 8.0+
-    -   Indexing untuk optimasi query
-    -   Foreign keys untuk integritas data
-    -   Prepared statements untuk keamanan
+-   **Framework**: Laravel 12
+-   **PHP Version**: 8.2
+-   **Database**: SQLite
+-   **File Storage**: Local disk dengan symlink ke public
 
 ### Frontend
 
--   Blade Template Engine
--   Tailwind CSS
--   JavaScript ES6+
-    -   Fetch API untuk AJAX
-    -   WebSocket untuk real-time updates
+-   **CSS Framework**: Tailwind CSS 3.4
+-   **Build Tool**: Vite 6.0
+-   **JavaScript**: ES Modules
+-   **HTTP Client**: Axios 1.7
 
-## Implementasi Chunking
+## Development Tools
 
-### 1. Response Chunking
+### Package Manager
 
-```php
-public function index()
+-   **PHP**: Composer
+-   **JavaScript**: NPM
+
+### Development Dependencies
+
+```json
 {
-    return Book::query()
-        ->when(request('search'), function($q, $search) {
-            $q->where('judul', 'like', "%{$search}%");
-        })
-        ->chunk(100, function($books) {
-            foreach ($books as $book) {
-                // Process each chunk
-            }
-        });
+    "autoprefixer": "^10.4.21",
+    "axios": "^1.7.4",
+    "concurrently": "^9.0.1",
+    "laravel-vite-plugin": "^1.2.0",
+    "postcss": "^8.5.3",
+    "tailwindcss": "^3.4.17",
+    "vite": "^6.0.11"
 }
 ```
 
-### 2. PDF Streaming
+## Konfigurasi
 
-```php
-public function streamPdf($id)
-{
-    $book = Book::findOrFail($id);
-    $path = storage_path("app/{$book->file_path}");
+### Vite
 
-    return response()->stream(
-        function() use ($path) {
-            $stream = fopen($path, 'rb');
-            while (!feof($stream)) {
-                echo fread($stream, 1024 * 8); // 8KB chunks
-                flush();
-            }
-            fclose($stream);
-        },
-        200,
-        [
-            'Content-Type' => 'application/pdf',
-            'Content-Disposition' => 'inline'
-        ]
-    );
-}
-```
+```javascript
+import { defineConfig } from "vite";
+import laravel from "laravel-vite-plugin";
+import tailwindcss from "@tailwindcss/vite";
 
-## Cache Implementation
-
-### 1. Query Cache
-
-```php
-public function getBooks()
-{
-    return Cache::remember('books.all', 3600, function () {
-        return Book::select(['id', 'judul', 'thumbnail_path'])
-            ->latest()
-            ->paginate(12);
-    });
-}
-```
-
-### 2. File Cache
-
-```php
-public function getPdfSegment($bookId, $segment)
-{
-    $cacheKey = "book.{$bookId}.segment.{$segment}";
-
-    return Cache::remember($cacheKey, 3600, function () use ($bookId, $segment) {
-        // Process and return PDF segment
-        return $this->processPdfSegment($bookId, $segment);
-    });
-}
-```
-
-## Background Jobs
-
-### 1. PDF Processing
-
-```php
-class ProcessPdfUpload implements ShouldQueue
-{
-    public function handle()
-    {
-        // 1. Validate PDF
-        // 2. Generate thumbnails
-        // 3. Split into segments
-        // 4. Cache segments
-    }
-}
-```
-
-### 2. Notifications
-
-```php
-class SendPeminjamanNotification implements ShouldQueue
-{
-    public function handle()
-    {
-        // Batch notifications in chunks
-        Notification::chunk(100, function($notifications) {
-            // Process each notification chunk
-        });
-    }
-}
-```
-
-## Security Measures
-
-### 1. File Access
-
-```php
-public function generateSignedUrl($bookId)
-{
-    return URL::temporarySignedRoute(
-        'books.view-pdf',
-        now()->addMinutes(30),
-        ['id' => $bookId]
-    );
-}
-```
-
-### 2. Rate Limiting
-
-```php
-// routes/web.php
-Route::middleware(['auth', 'throttle:60,1'])->group(function () {
-    Route::get('/book/{id}/pdf', 'BookController@viewPdf');
+export default defineConfig({
+    plugins: [
+        laravel({
+            input: ["resources/css/app.css", "resources/js/app.js"],
+            refresh: true,
+        }),
+        tailwindcss(),
+    ],
 });
 ```
 
-## Monitoring & Logging
+### Tailwind CSS
 
-### 1. Performance Logging
-
-```php
-Log::channel('performance')->info('Query Execution', [
-    'query' => $query->toSql(),
-    'time' => $executionTime,
-    'memory' => memory_get_usage(true)
-]);
+```javascript
+module.exports = {
+    content: [
+        "./resources/**/*.blade.php",
+        "./resources/**/*.js",
+        "./resources/**/*.vue",
+    ],
+    darkMode: false,
+    theme: {
+        extend: {},
+    },
+    variants: {
+        extend: {},
+    },
+    plugins: [],
+};
 ```
 
-### 2. Error Tracking
+## Development Scripts
 
-```php
-try {
-    // Process large dataset
-} catch (\Exception $e) {
-    Log::error('Data Processing Failed', [
-        'error' => $e->getMessage(),
-        'trace' => $e->getTraceAsString()
-    ]);
-
-    return response()->json([
-        'error' => 'Processing failed',
-        'code' => 'E_PROC_FAIL'
-    ], 500);
+```json
+{
+    "build": "vite build",
+    "dev": "vite"
 }
 ```
 
-## Development Guidelines
+## Asset Management
 
-### Code Organization
+### Directory Structure
 
--   Controllers: CRUD operations dan basic flow
--   Services: Business logic
--   Jobs: Background processing
--   Events/Listeners: Async operations
--   Resources: API transformations
+```
+resources/
+├── css/
+│   └── app.css      # Entry point untuk CSS
+├── js/
+│   └── app.js       # Entry point untuk JavaScript
+└── views/           # Blade templates
+```
 
-### Performance Rules
+### File Storage
 
-1. Selalu gunakan pagination untuk list data
-2. Cache queries yang sering diakses
-3. Chunk large datasets
-4. Implement lazy loading
-5. Optimize database indexes
+-   **Thumbnail Storage**: `storage/app/public/thumbnails/`
+-   **PDF Storage**: `storage/app/public/pdfs/`
+-   **Public Access**: Via symlink ke `public/storage/`
 
-### Security Checklist
+## Security Features
 
-1. Input validation
-2. Output sanitization
-3. CSRF protection
-4. Rate limiting
-5. File access control
-6. SQL injection prevention
+### Authentication
+
+-   Native Laravel authentication
+-   Session-based auth
+-   Password hashing dengan bcrypt
+-   Remember me functionality
+
+### File Upload Security
+
+1. **Thumbnail Validation**
+
+    - Format: jpeg, png, jpg
+    - Max size: 2MB
+    - Mime type verification
+
+2. **PDF Validation**
+
+    - Format: pdf only
+    - Max size: 10MB
+    - Mime type verification
+
+3. **Storage Security**
+    - Private storage dengan public symlink
+    - Secure file naming
+    - File existence validation
+
+### Route Protection
+
+-   Middleware authentication
+-   Role-based access control
+-   CSRF protection
+-   Rate limiting
+
+## Database Configuration
+
+```php
+'default' => env('DB_CONNECTION', 'sqlite'),
+
+'connections' => [
+    'sqlite' => [
+        'driver' => 'sqlite',
+        'database' => database_path('database.sqlite'),
+        'prefix' => '',
+        'foreign_key_constraints' => true,
+    ],
+],
+```
+
+## Cache & Session
+
+-   Database-based session storage
+-   Database-based cache storage
+-   Queue system berbasis database
+
+## Development Environment
+
+-   Local development dengan Vite dev server
+-   Hot module replacement untuk frontend
+-   Database migrations & seeding
+-   Storage linking otomatis
+
+## Deployment Requirements
+
+1. PHP 8.2+
+2. Composer
+3. Node.js & NPM
+4. SQLite support
+5. File permissions untuk storage & cache
+6. Symlink capability
+
+## Performance Optimizations
+
+1. CSS & JS minification via Vite
+2. Tailwind CSS purging unused styles
+3. Response caching capabilities
+4. Eager loading untuk relasi database
+5. Lazy loading untuk assets
+
+## Monitoring & Logging
+
+1. Laravel built-in logging
+2. Custom logging untuk file access
+3. Query logging (development)
+4. Error tracking
+5. User activity logging
+
+## Testing
+
+-   PHPUnit untuk unit testing
+-   Feature testing capability
+-   Browser testing support
+-   Factory patterns untuk test data
+
+## Maintenance Mode
+
+-   Built-in maintenance mode support
+-   Custom maintenance page
+-   Bypass untuk admin users

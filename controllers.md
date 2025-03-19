@@ -1,240 +1,199 @@
-# Controllers
+# Dokumentasi Controllers
 
-## Struktur Controller
+## Struktur Controllers
 
-### Admin Controllers
+Aplikasi menggunakan struktur controller yang terpisah untuk admin dan user biasa:
 
-1. BookController (Admin)
-2. MemberController (Admin)
-3. PeminjamanController (Admin)
-
-### Public Controllers
-
-1. BookController
-2. HomeController
-3. MemberController
-4. PeminjamanController
-
-### Auth Controllers
-
-1. LoginController
-2. RegisterController
-
-## Detail Implementasi
-
-### Admin BookController
-
-File: `app/Http/Controllers/Admin/BookController.php`
-
-```php
-class BookController extends Controller
-{
-    // Menampilkan daftar buku
-    public function index()
-    {
-        $books = Book::latest()->paginate(10);
-        return view('admin.books.index', compact('books'));
-    }
-
-    // Form tambah buku
-    public function create()
-    {
-        return view('admin.books.create');
-    }
-
-    // Menyimpan buku baru
-    public function store(Request $request)
-    {
-        // Validasi
-        - judul (required, max:255)
-        - tahun_terbit (required, numeric, 1900-sekarang)
-        - deskripsi (required)
-        - thumbnail (required, image, max:2MB)
-        - file (required, PDF, max:10MB)
-
-        // Upload files ke storage/app/public
-        - thumbnail ke thumbnails/
-        - PDF ke pdfs/
-
-        // Simpan data buku
-    }
-
-    // Form edit buku
-    public function edit(Book $book)
-    {
-        return view('admin.books.edit', compact('book'));
-    }
-
-    // Update data buku
-    public function update(Request $request, Book $book)
-    {
-        // Validasi sama seperti store
-        // Update thumbnail/PDF jika ada
-        // Hapus file lama jika diganti
-        // Update data buku
-    }
-
-    // Hapus buku
-    public function destroy(Book $book)
-    {
-        // Hapus file terkait
-        // Hapus data buku
-    }
-}
+```
+app/Http/Controllers/
+├── Admin/
+│   ├── BookController.php
+│   ├── MemberController.php
+│   └── PeminjamanController.php
+├── Auth/
+│   ├── LoginController.php
+│   └── RegisterController.php
+├── BookController.php
+├── HomeController.php
+├── MemberController.php
+└── PeminjamanController.php
 ```
 
-### Admin PeminjamanController
+## Book Management
 
-File: `app/Http/Controllers/Admin/PeminjamanController.php`
+### BookController (User)
 
-```php
-class PeminjamanController extends Controller
-{
-    // List semua peminjaman
-    public function index(Request $request)
-    {
-        // Filter berdasarkan status
-        $status = $request->get('status', 'semua');
-        $query = Peminjaman::with(['user', 'book', 'approver'])
-            ->latest();
+Controller untuk akses buku oleh user biasa.
 
-        if ($status !== 'semua') {
-            $query->where('status', $status);
-        }
+#### Endpoints:
 
-        $peminjaman = $query->paginate(10);
-    }
+1. **read($id)**
 
-    // Approve peminjaman
-    public function approve($id)
-    {
-        // Validasi status harus 'menunggu'
-        // Update status jadi 'disetujui'
-        // Set approved_by ke admin yang login
-    }
+    - Route: `GET /books/{id}/read`
+    - View: `books.read`
+    - Fungsi: Menampilkan detail buku untuk dibaca
 
-    // Reject peminjaman
-    public function reject($id)
-    {
-        // Validasi status harus 'menunggu'
-        // Update status jadi 'ditolak'
-        // Set approved_by ke admin yang login
-    }
+2. **viewPdf($id)**
+    - Route: `GET /books/{id}/pdf`
+    - Fungsi: Streaming file PDF buku
+    - Security:
+        - Validasi existence file
+        - Headers security untuk PDF viewing
+        - Logging untuk tracking akses
 
-    // Konfirmasi pengembalian
-    public function return($id)
-    {
-        // Validasi status harus 'dipinjam'
-        // Update status jadi 'dikembalikan'
-        // Set tanggal_dikembalikan ke now()
-    }
-}
+### Admin/BookController
+
+Controller untuk manajemen buku oleh admin.
+
+#### Endpoints:
+
+1. **index()**
+
+    - Route: `GET /admin/books`
+    - View: `admin.books.index`
+    - Fungsi: List semua buku dengan paginasi
+
+2. **create()**
+
+    - Route: `GET /admin/books/create`
+    - View: `admin.books.create`
+    - Fungsi: Form tambah buku baru
+
+3. **store(Request $request)**
+
+    - Route: `POST /admin/books`
+    - Validasi:
+        - judul: required, max 255 chars
+        - tahun_terbit: required, numeric, 1900-current
+        - deskripsi: required
+        - thumbnail: required, image, max 2MB
+        - file: required, PDF, max 10MB
+    - Storage:
+        - Thumbnail: public/thumbnails/
+        - PDF: public/pdfs/
+
+4. **edit(Book $book)**
+
+    - Route: `GET /admin/books/{book}/edit`
+    - View: `admin.books.edit`
+    - Fungsi: Form edit buku
+
+5. **update(Request $request, Book $book)**
+
+    - Route: `PUT /admin/books/{book}`
+    - Validasi: sama dengan store
+    - Fitur:
+        - Update metadata buku
+        - Optional update thumbnail & PDF
+        - Hapus file lama jika ada update
+
+6. **destroy(Book $book)**
+    - Route: `DELETE /admin/books/{book}`
+    - Fitur:
+        - Hapus record buku
+        - Hapus file terkait (thumbnail & PDF)
+
+## Peminjaman Management
+
+### PeminjamanController (User)
+
+Controller untuk manajemen peminjaman oleh user.
+
+#### Endpoints:
+
+1. **create(Request $request, $id)**
+
+    - Route: `GET /peminjaman/create/{id}`
+    - View: `peminjaman.create`
+    - Validasi: Cek peminjaman aktif
+
+2. **store(Request $request)**
+
+    - Route: `POST /peminjaman`
+    - Validasi:
+        - book_id: required, exists
+        - tanggal_pinjam: required, date, >= today
+        - durasi: required, 1-7 hari
+    - Fungsi: Buat pengajuan peminjaman baru
+
+3. **index()**
+
+    - Route: `GET /peminjaman`
+    - View: `peminjaman.index`
+    - Fungsi: List peminjaman user
+
+4. **show($id)**
+    - Route: `GET /peminjaman/{id}`
+    - View: `peminjaman.show`
+    - Fungsi: Detail peminjaman
+
+### Admin/PeminjamanController
+
+Controller untuk approval dan manajemen peminjaman oleh admin.
+
+#### Endpoints:
+
+1. **index(Request $request)**
+
+    - Route: `GET /admin/peminjaman`
+    - View: `admin.peminjaman.index`
+    - Fitur:
+        - List semua peminjaman
+        - Filter by status
+        - Pagination
+
+2. **approve($id)**
+
+    - Route: `POST /admin/peminjaman/{id}/approve`
+    - Validasi: Status harus 'menunggu'
+    - Fungsi: Approve permintaan peminjaman
+
+3. **reject($id)**
+
+    - Route: `POST /admin/peminjaman/{id}/reject`
+    - Validasi: Status harus 'menunggu'
+    - Fungsi: Tolak permintaan peminjaman
+
+4. **return($id)**
+    - Route: `POST /admin/peminjaman/{id}/return`
+    - Validasi: Status harus 'dipinjam'
+    - Fungsi: Konfirmasi pengembalian buku
+
+## Flow Peminjaman Buku
+
+```mermaid
+stateDiagram-v2
+    [*] --> Menunggu: User submit permintaan
+    Menunggu --> Disetujui: Admin approve
+    Menunggu --> Ditolak: Admin reject
+    Disetujui --> Dipinjam: User ambil buku
+    Dipinjam --> Dikembalikan: Admin konfirmasi return
+    Dipinjam --> Terlambat: Lewat deadline
+    Terlambat --> Dikembalikan: Admin konfirmasi return
+    Ditolak --> [*]
+    Dikembalikan --> [*]
 ```
-
-### Public PeminjamanController
-
-File: `app/Http/Controllers/PeminjamanController.php`
-
-```php
-class PeminjamanController extends Controller
-{
-    // Form peminjaman
-    public function create(Request $request, $id)
-    {
-        // Cek buku exists
-        // Cek belum ada peminjaman aktif
-        return view('peminjaman.create', compact('book'));
-    }
-
-    // Simpan peminjaman
-    public function store(Request $request)
-    {
-        // Validasi
-        - book_id (required, exists)
-        - tanggal_pinjam (required, after_or_equal:today)
-        - durasi (required, 1-7 hari)
-
-        // Set tanggal kembali = tanggal pinjam + durasi
-        // Create peminjaman dengan status 'menunggu'
-    }
-
-    // List peminjaman user
-    public function index()
-    {
-        $peminjaman = Peminjaman::with(['book', 'approver'])
-            ->where('user_id', auth()->id())
-            ->latest()
-            ->paginate(10);
-    }
-
-    // Detail peminjaman
-    public function show($id)
-    {
-        // Load peminjaman dengan relasi
-        // Validasi kepemilikan
-    }
-}
-```
-
-### HomeController
-
-File: `app/Http/Controllers/HomeController.php`
-
-```php
-class HomeController extends Controller
-{
-    // Halaman utama
-    public function index()
-    {
-        $books = Book::latest()->paginate(12);
-        return view('home', compact('books'));
-    }
-
-    // Detail buku
-    public function show($id)
-    {
-        $book = Book::findOrFail($id);
-        return view('book.show', compact('book'));
-    }
-}
-```
-
-### Auth Controllers
-
-#### LoginController
-
-File: `app/Http/Controllers/Auth/LoginController.php`
-
--   Menangani proses login
--   Redirect berdasarkan role user
-
-#### RegisterController
-
-File: `app/Http/Controllers/Auth/RegisterController.php`
-
--   Validasi data registrasi
--   Create user baru dengan role 'member'
--   Auto login setelah register
 
 ## Middleware
 
-### CheckRole
+-   `CheckRole`: Validasi role user untuk akses tertentu
+-   `Authenticate`: Verifikasi user login
+-   `RedirectIfAuthenticated`: Redirect user yang sudah login
 
-File: `app/Http/Middleware/CheckRole.php`
+## Validasi & Security
 
--   Validasi role user
--   Redirect ke home jika tidak punya akses
+1. Role-based Access Control (RBAC)
+2. Form validation untuk semua input
+3. File validation untuk upload
+4. Secure file storage dengan public disk
+5. PDF viewing security headers
+6. Status validation untuk peminjaman
+7. Logging untuk tracking system
 
-### Authenticate
+## Error Handling
 
-File: `app/Http/Middleware/Authenticate.php`
-
--   Cek user sudah login
--   Redirect ke login jika belum
-
-### RedirectIfAuthenticated
-
-File: `app/Http/Middleware/RedirectIfAuthenticated.php`
-
--   Redirect user yang sudah login
--   Berbeda redirect berdasarkan role
+1. 404 untuk resource tidak ditemukan
+2. Validasi status untuk transisi peminjaman
+3. File existence checking
+4. Peminjaman ganda prevention
+5. Storage error handling

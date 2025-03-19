@@ -1,61 +1,66 @@
-# Project Brief: Sistem Perpustakaan Digital
+# Sistem Perpustakaan (Library Management System)
 
-## Tujuan Proyek
+## Overview
 
-Mengembangkan sistem perpustakaan digital yang memungkinkan pengelolaan buku dan peminjaman secara efisien, dengan fokus pada performa dan user experience yang baik.
+Sistem manajemen perpustakaan berbasis web yang dibangun menggunakan Laravel 12. Sistem ini memungkinkan pengelolaan buku, anggota, dan transaksi peminjaman buku secara digital.
 
-## Ruang Lingkup
+## Teknologi Utama
 
-### Fitur Inti
+-   PHP 8.2
+-   Laravel 12.0
+-   SQLite Database
+-   Tailwind CSS
+-   Vite (Frontend Bundler)
 
-1. Manajemen Buku Digital
-2. Sistem Peminjaman
-3. Role-based Access (Admin & Member)
-4. Proteksi dan Streaming PDF
+## Fitur Utama
 
-### Fokus Pengembangan
+1. **Manajemen Buku**
 
--   Optimasi performa loading PDF
--   Implementasi chunking untuk API responses
--   Sistem notifikasi status peminjaman
--   Dashboard reporting
+    - Penyimpanan data buku (judul, tahun terbit, deskripsi)
+    - Upload thumbnail dan file buku
+    - Pencarian dan filter buku
 
-## Batasan Teknis
+2. **Sistem Peminjaman**
 
--   Response API harus di-chunk untuk menghindari response too long
--   PDF loading harus dioptimasi untuk file besar
--   Performa query harus dioptimasi untuk skala besar
--   Keamanan file PDF harus terjamin
+    - Peminjaman buku oleh anggota
+    - Tracking status peminjaman (menunggu, disetujui, dipinjam, dikembalikan, terlambat, ditolak)
+    - Pencatatan tanggal pinjam dan kembali
+    - Approval system oleh admin
 
-## Teknologi
+3. **Manajemen Pengguna**
+    - Multi-role user (admin dan member)
+    - Sistem autentikasi
+    - Manajemen profil pengguna
 
--   Backend: Laravel 12 + PHP 8.2
--   Database: MySQL
--   Frontend: Blade + Tailwind CSS
--   File Storage: Local/Cloud Storage
+## Struktur Database Utama
 
-## Prioritas Pengembangan
+### Books Table
 
-1. Optimasi Performa
+-   id (Primary Key)
+-   judul
+-   tahun_terbit
+-   deskripsi
+-   thumbnail_path
+-   file_path
+-   timestamps
 
-    - Chunking API responses
-    - PDF loading optimization
-    - Query optimization
+### Peminjaman Table
 
-2. Peningkatan UX
+-   id (Primary Key)
+-   user_id (Foreign Key)
+-   book_id (Foreign Key)
+-   tanggal_pinjam
+-   tanggal_kembali
+-   tanggal_dikembalikan
+-   status (enum: menunggu, disetujui, dipinjam, dikembalikan, terlambat, ditolak)
+-   catatan
+-   approved_by (Foreign Key ke users)
+-   timestamps
 
-    - Sistem notifikasi
-    - Dashboard reporting
-    - Pencarian dan filter
+## Konfigurasi Sistem
 
-3. Keamanan
-    - File protection
-    - Rate limiting
-    - Input validation
-
-## Metrics Keberhasilan
-
--   Response time < 2 detik
--   Zero memory overflow dari API responses
--   PDF loading < 3 detik
--   99% uptime
+-   Menggunakan SQLite sebagai database default
+-   Session management berbasis database
+-   File storage menggunakan local disk
+-   Queue system berbasis database
+-   Cache storage berbasis database
