@@ -29,10 +29,18 @@
 </head>
 <body class="bg-gray-50" x-data="{ 
     previewUrl: '{{ $book->thumbnail_path ? asset('storage/' . $book->thumbnail_path) : null }}',
+    abstrakPreviewUrl: '{{ $book->abstrak_image_path ? asset('storage/' . $book->abstrak_image_path) : null }}',
+    abstrakType: '{{ $book->abstrak_text ? 'text' : 'image' }}',
     handleThumbnailChange(event) {
         const file = event.target.files[0];
         if (file) {
             this.previewUrl = URL.createObjectURL(file);
+        }
+    },
+    handleAbstrakImageChange(event) {
+        const file = event.target.files[0];
+        if (file) {
+            this.abstrakPreviewUrl = URL.createObjectURL(file);
         }
     }
 }">
@@ -118,7 +126,7 @@
 
                     <!-- Form Grid -->
                     <div class="grid grid-cols-1 gap-y-8 gap-x-4 sm:grid-cols-6">
-                        <div class="sm:col-span-6">
+                        <div class="sm:col-span-4">
                             <label for="judul" class="block text-sm font-semibold text-gray-700 mb-2">
                                 Judul Buku
                             </label>
@@ -127,6 +135,80 @@
                                        class="block w-full rounded-lg border-gray-300 shadow-sm focus:ring-2 focus:ring-indigo-500 
                                               focus:border-transparent transition-all duration-300 py-3 px-4"
                                        value="{{ old('judul', $book->judul) }}" required>
+                            </div>
+                        </div>
+
+                        <div class="sm:col-span-2">
+                            <label for="kategori" class="block text-sm font-semibold text-gray-700 mb-2">
+                                Kategori
+                            </label>
+                            <div class="mt-1">
+                                <select name="kategori" id="kategori"
+                                    class="block w-full rounded-lg border-gray-300 shadow-sm focus:ring-2 focus:ring-indigo-500 
+                                           focus:border-transparent transition-all duration-300 py-3 px-4">
+                                    @foreach ($kategoriOptions as $value => $label)
+                                        <option value="{{ $value }}" {{ (old('kategori', $book->kategori) == $value) ? 'selected' : '' }}>
+                                            {{ $label }}
+                                        </option>
+                                    @endforeach
+                                </select>
+                            </div>
+                        </div>
+
+                        <div class="sm:col-span-6">
+                            <label class="block text-sm font-semibold text-gray-700 mb-2">
+                                Abstrak
+                            </label>
+                            <div class="mt-1 space-y-4">
+                                <div class="flex space-x-4 mb-4">
+                                    <button type="button" @click="abstrakType = 'text'"
+                                            :class="{'bg-indigo-600 text-white': abstrakType === 'text', 'bg-white text-gray-700': abstrakType !== 'text'}"
+                                            class="px-4 py-2 rounded-lg border border-gray-300 text-sm font-medium transition-all duration-300">
+                                        Text
+                                    </button>
+                                    <button type="button" @click="abstrakType = 'image'"
+                                            :class="{'bg-indigo-600 text-white': abstrakType === 'image', 'bg-white text-gray-700': abstrakType !== 'image'}"
+                                            class="px-4 py-2 rounded-lg border border-gray-300 text-sm font-medium transition-all duration-300">
+                                        Image
+                                    </button>
+                                </div>
+
+                                <div x-show="abstrakType === 'text'">
+                                    <textarea name="abstrak_text" rows="4"
+                                              class="block w-full rounded-lg border-gray-300 shadow-sm focus:ring-2 focus:ring-indigo-500 
+                                                     focus:border-transparent transition-all duration-300 py-3 px-4"
+                                              placeholder="Masukkan abstrak buku dalam bentuk text">{{ old('abstrak_text', $book->abstrak_text) }}</textarea>
+                                    <p class="mt-2 text-sm text-gray-500">Maksimal 1000 kata</p>
+                                </div>
+
+                                <div x-show="abstrakType === 'image'" class="mt-1">
+                                    <div class="flex justify-center px-6 pt-5 pb-6 border-2 border-gray-300 border-dashed rounded-lg hover:border-indigo-500 transition-colors duration-300">
+                                        <div class="space-y-1 text-center">
+                                            <template x-if="!abstrakPreviewUrl">
+                                                <svg class="mx-auto h-12 w-12 text-gray-400" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                                                    <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" 
+                                                          d="M4 16l4.586-4.586a2 2 0 012.828 0L16 16m-2-2l1.586-1.586a2 2 0 012.828 0L20 14m-6-6h.01M6 20h12a2 2 0 002-2V6a2 2 0 00-2-2H6a2 2 0 00-2 2v12a2 2 0 002 2z"/>
+                                                </svg>
+                                            </template>
+                                            <template x-if="abstrakPreviewUrl">
+                                                <img :src="abstrakPreviewUrl" class="mx-auto h-32 w-auto object-cover rounded-lg">
+                                            </template>
+                                            <div class="flex text-sm text-gray-600 mt-4">
+                                                <label for="abstrak_image" class="relative cursor-pointer rounded-md font-medium text-indigo-600 hover:text-indigo-500">
+                                                    <span>{{ $book->abstrak_image_path ? 'Ganti gambar abstrak' : 'Upload gambar abstrak' }}</span>
+                                                    <input id="abstrak_image" name="abstrak_image" type="file" accept="image/*" class="sr-only"
+                                                           @change="handleAbstrakImageChange">
+                                                </label>
+                                            </div>
+                                            @if($book->abstrak_image_path)
+                                                <p class="text-xs text-gray-500 mt-2">File saat ini: {{ basename($book->abstrak_image_path) }}</p>
+                                            @endif
+                                            <p class="text-xs text-gray-500 mt-2">
+                                                PNG, JPG hingga 2MB
+                                            </p>
+                                        </div>
+                                    </div>
+                                </div>
                             </div>
                         </div>
 

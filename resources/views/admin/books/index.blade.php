@@ -96,6 +96,9 @@
                                 Buku
                             </th>
                             <th scope="col" class="px-6 py-4 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">
+                                Kategori
+                            </th>
+                            <th scope="col" class="px-6 py-4 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">
                                 Tahun Terbit
                             </th>
                             <th scope="col" class="relative px-6 py-4">
@@ -124,9 +127,28 @@
                                         </div>
                                         <div class="ml-4">
                                             <div class="text-sm font-medium text-gray-900">{{ $book->judul }}</div>
-                                            <div class="text-sm text-gray-500 mt-1">{{ Str::limit($book->deskripsi, 100) }}</div>
+                                            <div class="text-sm text-gray-500 mt-1">
+                                                @if($book->abstrak_text)
+                                                    {{ Str::limit($book->abstrak_text, 100) }}
+                                                @elseif($book->abstrak_image_path)
+                                                    <span class="text-indigo-600">[Abstrak dalam bentuk gambar]</span>
+                                                @else
+                                                    {{ Str::limit($book->deskripsi, 100) }}
+                                                @endif
+                                            </div>
                                         </div>
                                     </div>
+                                </td>
+                                <td class="px-6 py-4 whitespace-nowrap">
+                                    <span class="px-2 py-1 text-xs font-medium rounded-full
+                                        {{ $book->kategori === 'Fiksi' ? 'bg-blue-100 text-blue-800' : '' }}
+                                        {{ $book->kategori === 'Non-Fiksi' ? 'bg-green-100 text-green-800' : '' }}
+                                        {{ $book->kategori === 'Pendidikan' ? 'bg-purple-100 text-purple-800' : '' }}
+                                        {{ $book->kategori === 'Sejarah' ? 'bg-yellow-100 text-yellow-800' : '' }}
+                                        {{ $book->kategori === 'Teknologi' ? 'bg-indigo-100 text-indigo-800' : '' }}
+                                        {{ $book->kategori === 'Lainnya' ? 'bg-gray-100 text-gray-800' : '' }}">
+                                        {{ $book->kategori }}
+                                    </span>
                                 </td>
                                 <td class="px-6 py-4 whitespace-nowrap text-sm text-gray-500">
                                     {{ $book->tahun_terbit }}

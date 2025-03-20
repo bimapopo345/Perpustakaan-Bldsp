@@ -16,8 +16,11 @@ class Book extends Model
      */
     protected $fillable = [
         'judul',
+        'kategori',
         'tahun_terbit',
         'deskripsi',
+        'abstrak_text',
+        'abstrak_image_path',
         'thumbnail_path',
         'file_path',
     ];
@@ -42,5 +45,31 @@ class Book extends Model
             return null;
         }
         return asset('storage/' . $this->file_path);
+    }
+
+    /**
+     * Get the URL for the book's abstrak image.
+     */
+    public function getAbstrakImageUrlAttribute()
+    {
+        if (!$this->abstrak_image_path) {
+            return null;
+        }
+        return asset('storage/' . $this->abstrak_image_path);
+    }
+
+    /**
+     * Get available kategori options.
+     */
+    public static function getKategoriOptions()
+    {
+        return [
+            'Fiksi' => 'Fiksi',
+            'Non-Fiksi' => 'Non-Fiksi',
+            'Pendidikan' => 'Pendidikan',
+            'Sejarah' => 'Sejarah',
+            'Teknologi' => 'Teknologi',
+            'Lainnya' => 'Lainnya',
+        ];
     }
 }
