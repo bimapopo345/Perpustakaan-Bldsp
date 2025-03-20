@@ -13,7 +13,7 @@ use Illuminate\Support\Facades\Route;
 
 // Public Routes
 Route::get('/', [HomeController::class, 'index'])->name('home');
-Route::get('/book/{id}', [HomeController::class, 'show'])->name('book.show');
+Route::get('/book/{id}', [BookController::class, 'show'])->name('book.show');
 Route::get('/book/{id}/read', [BookController::class, 'read'])->name('books.read');
 Route::get('/book/{id}/pdf', [BookController::class, 'viewPdf'])->name('books.view-pdf');
 

@@ -13,9 +13,34 @@
                     .then(data => {
                         modal.classList.remove('hidden');
                         document.querySelector('#bookTitle').textContent = data.judul;
+                        document.querySelector('#bookKategori').textContent = data.kategori;
                         document.querySelector('#bookYear').textContent = data.tahun_terbit;
                         document.querySelector('#bookDescription').textContent = data.deskripsi;
                         document.querySelector('#readBookBtn').href = data.read_url;
+
+                        // Handle abstrak
+                        if (data.abstrak_text) {
+                            document.querySelector('#abstrakText').textContent = data.abstrak_text;
+                            document.querySelector('#abstrakText').classList.remove('hidden');
+                            document.querySelector('#abstrakImage').classList.add('hidden');
+                        } else if (data.abstrak_image_path) {
+                            document.querySelector('#abstrakImage').src = data.abstrak_image_path;
+                            document.querySelector('#abstrakImage').classList.remove('hidden');
+                            document.querySelector('#abstrakText').classList.add('hidden');
+                        } else {
+                            document.querySelector('#abstrakText').classList.add('hidden');
+                            document.querySelector('#abstrakImage').classList.add('hidden');
+                        }
+
+                        // Update kategori class
+                        const kategoriSpan = document.querySelector('#bookKategori');
+                        kategoriSpan.className = 'px-2 py-1 text-xs font-medium rounded-full ' +
+                            (data.kategori === 'Fiksi' ? 'bg-blue-100 text-blue-800' :
+                            data.kategori === 'Non-Fiksi' ? 'bg-green-100 text-green-800' :
+                            data.kategori === 'Pendidikan' ? 'bg-purple-100 text-purple-800' :
+                            data.kategori === 'Sejarah' ? 'bg-yellow-100 text-yellow-800' :
+                            data.kategori === 'Teknologi' ? 'bg-indigo-100 text-indigo-800' :
+                            'bg-gray-100 text-gray-800');
                         
                         if (data.thumbnail_path) {
                             thumbnail.src = data.thumbnail_path;
@@ -86,10 +111,20 @@
                             <!-- Book Details -->
                             <div class="md:w-1/2 p-8">
                                 <h3 id="bookTitle" class="text-2xl font-bold text-gray-900 mb-4"></h3>
-                                <p class="text-gray-600 mb-6">
-                                    <span class="font-semibold">Tahun Terbit:</span>
-                                    <span id="bookYear"></span>
-                                </p>
+                                <div class="flex items-center gap-3 mb-4">
+                                    <span id="bookKategori"></span>
+                                    <span class="text-gray-600">
+                                        <span class="font-semibold">Tahun:</span>
+                                        <span id="bookYear"></span>
+                                    </span>
+                                </div>
+
+                                <div class="prose max-w-none mb-6">
+                                    <h4 class="text-lg font-semibold text-gray-900 mb-2">Abstrak</h4>
+                                    <p id="abstrakText" class="text-gray-600"></p>
+                                    <img id="abstrakImage" class="hidden max-w-full h-auto rounded-lg" alt="Abstrak">
+                                </div>
+
                                 <div class="prose max-w-none mb-8">
                                     <h4 class="text-lg font-semibold text-gray-900 mb-2">Deskripsi</h4>
                                     <p id="bookDescription" class="text-gray-600"></p>

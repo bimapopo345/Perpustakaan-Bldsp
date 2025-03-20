@@ -9,6 +9,24 @@ use Illuminate\Support\Facades\Storage;
 
 class BookController extends Controller
 {
+    public function show($id)
+    {
+        $book = Book::findOrFail($id);
+
+        return response()->json([
+            'id' => $book->id,
+            'judul' => $book->judul,
+            'kategori' => $book->kategori,
+            'tahun_terbit' => $book->tahun_terbit,
+            'deskripsi' => $book->deskripsi,
+            'abstrak_text' => $book->abstrak_text,
+            'abstrak_image_path' => $book->abstrak_image_path ? asset('storage/' . $book->abstrak_image_path) : null,
+            'thumbnail_path' => $book->thumbnail_path ? asset('storage/' . $book->thumbnail_path) : null,
+            'read_url' => route('books.read', $book->id),
+            'pinjam_url' => auth()->check() && auth()->user()->role === 'member' ? route('peminjaman.create', $book->id) : null
+        ]);
+    }
+
     public function read($id)
     {
         $book = Book::findOrFail($id);

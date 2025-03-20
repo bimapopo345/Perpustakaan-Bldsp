@@ -152,8 +152,27 @@
                         </div>
                         <div class="p-6">
                             <h3 class="text-xl font-bold text-gray-900 mb-2 line-clamp-2">{{ $book->judul }}</h3>
-                            <p class="text-sm text-gray-600 mb-4">Tahun: {{ $book->tahun_terbit }}</p>
-                            <p class="text-sm text-gray-500 line-clamp-3">{{ $book->deskripsi }}</p>
+                            <div class="flex items-center gap-2 mb-2">
+                                <span class="px-2 py-1 text-xs font-medium rounded-full
+                                    {{ $book->kategori === 'Fiksi' ? 'bg-blue-100 text-blue-800' : '' }}
+                                    {{ $book->kategori === 'Non-Fiksi' ? 'bg-green-100 text-green-800' : '' }}
+                                    {{ $book->kategori === 'Pendidikan' ? 'bg-purple-100 text-purple-800' : '' }}
+                                    {{ $book->kategori === 'Sejarah' ? 'bg-yellow-100 text-yellow-800' : '' }}
+                                    {{ $book->kategori === 'Teknologi' ? 'bg-indigo-100 text-indigo-800' : '' }}
+                                    {{ $book->kategori === 'Lainnya' ? 'bg-gray-100 text-gray-800' : '' }}">
+                                    {{ $book->kategori }}
+                                </span>
+                                <p class="text-sm text-gray-600">Tahun: {{ $book->tahun_terbit }}</p>
+                            </div>
+                            <div class="mb-4">
+                                @if($book->abstrak_text)
+                                    <p class="text-sm text-gray-500 line-clamp-3">{{ $book->abstrak_text }}</p>
+                                @elseif($book->abstrak_image_path)
+                                    <p class="text-sm text-indigo-600">[Memiliki abstrak dalam bentuk gambar]</p>
+                                @else
+                                    <p class="text-sm text-gray-500 line-clamp-3">{{ $book->deskripsi }}</p>
+                                @endif
+                            </div>
                         </div>
                     </div>
                 @endforeach
