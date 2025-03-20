@@ -1,233 +1,223 @@
-# Konteks Produk Perpustakaan Digital
+# Konteks Produk Sistem Perpustakaan
 
-## Overview Produk
+## User Stories
 
-Perpustakaan Digital adalah platform modern untuk manajemen dan akses buku digital yang memungkinkan pengguna untuk mencari, membaca, dan meminjam buku secara online. Sistem ini dirancang untuk memudahkan akses ke pengetahuan sambil mempertahankan kontrol dan tracking yang baik atas penggunaan sumber daya perpustakaan.
+### 1. Sebagai Pengunjung
 
-## User Interface
+-   Saya ingin melihat daftar buku yang tersedia
+-   Saya ingin mencari buku berdasarkan judul
+-   Saya ingin mendaftar sebagai anggota
+-   Saya ingin melihat detail buku tertentu
 
-### 1. Landing Page
+### 2. Sebagai Member
+
+-   Saya ingin login ke sistem
+-   Saya ingin meminjam buku
+-   Saya ingin melihat status peminjaman saya
+-   Saya ingin membaca buku digital
+-   Saya ingin melihat riwayat peminjaman saya
+-   Saya ingin mengetahui kapan harus mengembalikan buku
+
+### 3. Sebagai Admin
+
+-   Saya ingin mengelola data buku (CRUD)
+-   Saya ingin menyetujui/menolak permintaan peminjaman
+-   Saya ingin mencatat pengembalian buku
+-   Saya ingin melihat laporan peminjaman
+-   Saya ingin mengelola data anggota
+-   Saya ingin melihat buku yang terlambat dikembalikan
+
+## Use Cases
+
+### 1. Peminjaman Buku
+
+```mermaid
+sequenceDiagram
+    actor Member
+    participant System
+    actor Admin
+
+    Member->>System: Pilih Buku
+    Member->>System: Ajukan Peminjaman
+    System->>Admin: Notifikasi Permintaan
+
+    alt Disetujui
+        Admin->>System: Setujui Peminjaman
+        System->>Member: Notifikasi Disetujui
+    else Ditolak
+        Admin->>System: Tolak Peminjaman
+        System->>Member: Notifikasi Ditolak
+    end
+```
+
+### 2. Pengembalian Buku
+
+```mermaid
+sequenceDiagram
+    actor Member
+    participant System
+    actor Admin
+
+    Member->>Admin: Kembalikan Buku
+    Admin->>System: Catat Pengembalian
+
+    alt Tepat Waktu
+        System->>Member: Update Status: Dikembalikan
+    else Terlambat
+        System->>Member: Update Status: Terlambat
+    end
+```
+
+## Business Rules
+
+### 1. Peminjaman
+
+-   Maksimal 3 buku aktif per member
+-   Durasi peminjaman: 1-7 hari
+-   Harus disetujui admin
+-   Status peminjaman harus jelas
+-   Tidak boleh ada peminjaman ganda
+
+### 2. Keanggotaan
+
+-   Email harus unik
+-   Password minimal 8 karakter
+-   Role: admin atau member
+-   Verifikasi email untuk aktivasi
+
+### 3. Pengelolaan Buku
+
+-   Thumbnail wajib ada
+-   File PDF opsional
+-   Tahun terbit tidak boleh lebih dari tahun sekarang
+-   Deskripsi wajib ada
+
+## Workflow Processes
+
+### 1. Registrasi Member
 
 ```mermaid
 graph TD
-    A[Hero Section] --> B[Search Bar]
-    A --> C[Navigation Menu]
-    B --> D[Hasil Pencarian]
-    D --> E[Grid Buku]
-    E --> F[Detail Modal]
+    A[Mulai] --> B[Isi Form]
+    B --> C[Validasi Data]
+    C --> D{Valid?}
+    D -->|Ya| E[Simpan Data]
+    D -->|Tidak| B
+    E --> F[Kirim Email Verifikasi]
+    F --> G[Aktivasi Akun]
+    G --> H[Selesai]
 ```
 
-#### Komponen UI
-
--   **Hero Section**
-
-    -   Gradient background animasi
-    -   Headline "Jelajahi Dunia Pengetahuan"
-    -   Search bar dengan efek glass-morphism
-    -   Floating decorative elements
-
--   **Navigation**
-
-    -   Logo/Brand
-    -   Login/Register untuk guest
-    -   Dashboard akses untuk user
-    -   Logout untuk user aktif
-
--   **Book Grid**
-    -   Responsive grid layout (1-4 kolom)
-    -   Card dengan hover effects
-    -   Thumbnail buku dengan fallback
-    -   Informasi dasar (judul, tahun, deskripsi)
-
-### 2. Fitur Visual
-
--   Animasi gradient background
--   Hover effects pada cards
--   Glass-morphism effects
--   Floating animations
--   Responsive design
--   Modal windows untuk detail
--   Image thumbnails dengan fallback
-
-## User Journey
-
-### 1. Guest User Flow
+### 2. Proses Peminjaman
 
 ```mermaid
-graph LR
-    A[Landing Page] --> B[Browse Books]
-    B --> C[View Details]
-    C --> D[Register/Login]
-    D --> E[Borrow Book]
+graph TD
+    A[Pilih Buku] --> B[Cek Ketersediaan]
+    B --> C{Tersedia?}
+    C -->|Ya| D[Ajukan Peminjaman]
+    C -->|Tidak| E[Notifikasi Tidak Tersedia]
+    D --> F[Review Admin]
+    F --> G{Keputusan}
+    G -->|Setuju| H[Update Status: Disetujui]
+    G -->|Tolak| I[Update Status: Ditolak]
+    H --> J[Notifikasi Member]
+    I --> J
 ```
 
-### 2. Member Flow
+## Access Control Matrix
 
-```mermaid
-graph LR
-    A[Login] --> B[Browse Books]
-    B --> C[View Details]
-    C --> D[Request Borrow]
-    D --> E[Track Status]
-    E --> F[Read Book]
-```
+### Role: Member
 
-### 3. Admin Flow
+| Resource           | Create | Read | Update | Delete |
+| ------------------ | ------ | ---- | ------ | ------ |
+| Profile Sendiri    | -      | ✓    | ✓      | -      |
+| Daftar Buku        | -      | ✓    | -      | -      |
+| File Buku          | -      | ✓    | -      | -      |
+| Peminjaman Sendiri | ✓      | ✓    | -      | -      |
+| Riwayat Peminjaman | -      | ✓    | -      | -      |
 
-```mermaid
-graph LR
-    A[Login] --> B[Dashboard]
-    B --> C[Manage Books]
-    B --> D[Manage Users]
-    B --> E[Process Requests]
-```
+### Role: Admin
 
-## Fitur Utama
+| Resource   | Create | Read | Update | Delete |
+| ---------- | ------ | ---- | ------ | ------ |
+| Buku       | ✓      | ✓    | ✓      | ✓      |
+| Member     | ✓      | ✓    | ✓      | ✓      |
+| Peminjaman | -      | ✓    | ✓      | -      |
+| Laporan    | -      | ✓    | -      | -      |
 
-### 1. Pencarian & Katalog
+## Notifikasi
 
--   Search bar responsif
--   Filter berdasarkan judul dan deskripsi
--   Grid view dengan pagination
--   Preview thumbnail dan deskripsi
--   Modal detail buku
+### 1. Email Notifikasi
 
-### 2. Manajemen Buku
+-   Verifikasi pendaftaran
+-   Persetujuan peminjaman
+-   Penolakan peminjaman
+-   Pengingat pengembalian
+-   Notifikasi keterlambatan
 
--   Upload buku digital (PDF)
--   Upload thumbnail
--   Metadata management
--   File preview system
--   Secure file storage
+### 2. System Notifikasi
 
-### 3. Sistem Peminjaman
+-   Status peminjaman berubah
+-   Buku baru ditambahkan
+-   Akun dinonaktifkan
+-   Password direset
 
--   Request peminjaman
--   Approval workflow
--   Status tracking
--   Durasi peminjaman
--   Pengembalian otomatis
+## Performance Requirements
 
-### 4. User Management
+### 1. Response Time
 
--   Role-based access
--   Member registration
--   Profile management
--   Activity history
--   Admin dashboard
+-   Halaman load < 2 detik
+-   Pencarian < 1 detik
+-   Upload file < 5 detik
+-   Download file < 3 detik
 
-## User Experience Design
+### 2. Concurrent Users
 
-### 1. Visual Hierarchy
+-   Minimal 100 user simultan
+-   Optimal 50 request/detik
 
--   Clean, modern interface
--   Clear call-to-actions
--   Visual feedback pada interaksi
--   Consistent branding elements
--   Responsive layouts
+## Data Retention
 
-### 2. Navigation Pattern
+### 1. Log Data
 
--   Intuitive menu structure
--   Breadcrumb navigation
--   Modal-based detail views
--   Dashboard organization
--   Clear status indicators
+-   Activity log: 30 hari
+-   Error log: 14 hari
+-   Access log: 7 hari
 
-### 3. Feedback System
+### 2. Backup
 
--   Success/error messages
--   Status updates
--   Loading indicators
--   Confirmation dialogs
--   Form validation
+-   Database: daily backup
+-   File storage: weekly backup
+-   Retention period: 90 hari
 
-## Content Strategy
+## Business Metrics
 
-### 1. Buku Digital
+### 1. Usage Metrics
 
--   Thumbnail visual
--   Metadata terstruktur
--   Preview konten
--   Download controls
--   Access restrictions
+-   Jumlah peminjaman per hari
+-   Rata-rata durasi peminjaman
+-   Buku paling populer
+-   Peak usage hours
 
-### 2. User Generated Content
+### 2. Performance Metrics
 
--   Peminjaman requests
--   Status updates
--   Activity logs
--   User profiles
--   Admin notes
+-   Response time
+-   Error rate
+-   Availability
+-   User satisfaction
 
-## Performance Considerations
+## Support & Maintenance
 
-### 1. Loading Optimization
+### 1. Technical Support
 
--   Lazy loading images
--   Pagination implementasi
--   Modal-based detail loading
--   Efficient search queries
--   Caching strategies
+-   Email support
+-   Bug reporting
+-   Feature request
+-   Documentation
 
-### 2. User Experience
+### 2. Maintenance Window
 
--   Smooth animations
--   Responsive interactions
--   Quick search results
--   Fast page loads
--   Minimal loading states
-
-## Security Features
-
-### 1. Access Control
-
--   Role-based permissions
--   Session management
--   Secure file access
--   Protected routes
--   Rate limiting
-
-### 2. Data Protection
-
--   Secure file storage
--   Encrypted connections
--   Protected user data
--   Safe file handling
--   Audit logging
-
-## Monitoring & Analytics
-
-### 1. User Behavior
-
--   Popular books
--   Search patterns
--   Usage statistics
--   User engagement
--   Peak usage times
-
-### 2. System Health
-
--   Error tracking
--   Performance metrics
--   Resource usage
--   Security events
--   API reliability
-
-## Future Enhancements
-
-### 1. Planned Features
-
--   Rating system
--   User reviews
--   Mobile app
--   Advanced search
--   Recommendation engine
-
-### 2. Potential Improvements
-
--   Multi-language support
--   Social features
--   Reading progress tracking
--   Notification system
--   Integration dengan e-reader
+-   Weekly maintenance
+-   Scheduled upgrades
+-   Emergency patching
+-   Version control

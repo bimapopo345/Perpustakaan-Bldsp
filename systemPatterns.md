@@ -1,276 +1,221 @@
-# Pola Sistem (System Patterns)
+# System Patterns & Architecture
 
-## Struktur Routing
+## Arsitektur Sistem
 
-### Public Routes
+Sistem perpustakaan menggunakan arsitektur MVC (Model-View-Controller) dengan Laravel framework.
 
-```php
-// Akses tanpa login
-Route::get('/', [HomeController::class, 'index']);
-Route::get('/book/{id}', [HomeController::class, 'show']);
-Route::get('/book/{id}/read', [BookController::class, 'read']);
-Route::get('/book/{id}/pdf', [BookController::class, 'viewPdf']);
+```mermaid
+flowchart TD
+    Client[Browser Client]
+    Router[Web Router]
+    MW[Middleware Layer]
+    C[Controllers]
+    M[Models]
+    V[Views/Blade Templates]
+    DB[(Database)]
+    FS[File Storage]
+
+    Client -->|HTTP Request| Router
+    Router -->|Validate Route| MW
+    MW -->|Process Request| C
+    C -->|Query Data| M
+    M -->|Get/Set Data| DB
+    C -->|File Operations| FS
+    C -->|Render| V
+    V -->|HTML Response| Client
 ```
 
-### Authentication Routes
+## Design Patterns
 
-```php
-Route::middleware('guest')->group(function () {
-    // Login Routes
-    Route::get('/login', [LoginController::class, 'showLoginForm']);
-    Route::post('/login', [LoginController::class, 'login']);
+### 1. Repository Pattern
 
-    // Register Routes
-    Route::get('/register', [RegisterController::class, 'showRegistrationForm']);
-    Route::post('/register', [RegisterController::class, 'register']);
-});
-```
+-   Pemisahan logika akses data dari controllers
+-   Memudahkan unit testing
+-   Contoh implementasi di model Book dan Peminjaman
 
-### Member Routes
+### 2. Service Pattern
 
-```php
-Route::middleware(['auth', 'role:member'])->group(function () {
-    // Dashboard
-    Route::get('/member/dashboard', [MemberController::class, 'dashboard']);
+-   Business logic dipisahkan ke service classes
+-   Reusable business rules
+-   Contoh: PeminjamanService untuk logika peminjaman
 
-    // Peminjaman Management
-    Route::get('/peminjaman', [PeminjamanController::class, 'index']);
-    Route::get('/peminjaman/{id}', [PeminjamanController::class, 'show']);
-    Route::get('/book/pinjam/{id}', [PeminjamanController::class, 'create']);
-    Route::post('/book/pinjam', [PeminjamanController::class, 'store']);
-});
-```
+### 3. Observer Pattern
 
-### Admin Routes
+-   Event handling untuk perubahan status peminjaman
+-   Notifikasi perubahan status
+-   Logging system events
 
-```php
-Route::middleware(['auth', 'role:admin'])
-    ->prefix('admin')
-    ->name('admin.')
-    ->group(function () {
-        // Dashboard
-        Route::get('/dashboard', 'dashboard');
+### 4. Policy Pattern
 
-        // Resource Routes
-        Route::resource('books', AdminBookController::class);
-        Route::get('/members', [AdminMemberController::class, 'index']);
+-   Authorization logic untuk akses resources
+-   Pemisahan logic dari controllers
+-   Role-based access control
 
-        // Peminjaman Management
-        Route::get('/peminjaman', [AdminPeminjamanController::class, 'index']);
-        Route::post('/peminjaman/{id}/approve', [AdminPeminjamanController::class, 'approve']);
-        Route::post('/peminjaman/{id}/reject', [AdminPeminjamanController::class, 'reject']);
-        Route::post('/peminjaman/{id}/return', [AdminPeminjamanController::class, 'return']);
-    });
-```
+## Flow Data
 
-## Authentication Pattern
-
-### Role-Based Access Control (RBAC)
-
-```php
-class CheckRole
-{
-    public function handle(Request $request, Closure $next, string $role): Response
-    {
-        if (!$request->user() || $request->user()->role !== $role) {
-            return redirect('/');
-        }
-        return $next($request);
-    }
-}
-```
-
-### Role Types
-
-1. **Guest**
-
-    - Dapat melihat daftar buku
-    - Dapat membaca detail buku
-    - Dapat melihat PDF buku
-    - Dapat register/login
-
-2. **Member**
-
-    - Semua akses guest
-    - Dapat mengajukan peminjaman
-    - Dapat melihat status peminjaman
-    - Dapat melihat history peminjaman
-
-3. **Admin**
-    - Manajemen buku (CRUD)
-    - Manajemen member
-    - Approval peminjaman
-    - Konfirmasi pengembalian
-
-## Flow Pattern
-
-### Flow Peminjaman Buku
+### 1. Flow Peminjaman Buku
 
 ```mermaid
 sequenceDiagram
-    participant M as Member
-    participant S as System
-    participant A as Admin
+    actor User
+    participant Controller
+    participant Service
+    participant Model
+    participant DB
 
-    M->>S: Pilih Buku
-    M->>S: Ajukan Peminjaman
-    S->>S: Status "menunggu"
-    S->>A: Notifikasi Peminjaman Baru
-
-    A->>S: Review Peminjaman
-    alt Disetujui
-        A->>S: Approve Peminjaman
-        S->>S: Status "disetujui"
-        M->>S: Ambil Buku
-        S->>S: Status "dipinjam"
-        Note over M,S: Masa Peminjaman Berjalan
-        alt Tepat Waktu
-            M->>S: Kembalikan Buku
-            A->>S: Konfirmasi Return
-            S->>S: Status "dikembalikan"
-        else Terlambat
-            S->>S: Status "terlambat"
-            M->>S: Kembalikan Buku
-            A->>S: Konfirmasi Return
-            S->>S: Status "dikembalikan"
-        end
-    else Ditolak
-        A->>S: Reject Peminjaman
-        S->>S: Status "ditolak"
+    User->>Controller: Request Peminjaman
+    Controller->>Service: Validate Request
+    Service->>Model: Check Availability
+    Model->>DB: Query Status
+    DB-->>Model: Book Status
+    Model-->>Service: Availability Status
+    alt Book Available
+        Service->>Model: Create Peminjaman
+        Model->>DB: Save Record
+        DB-->>Model: Success
+        Model-->>Service: Created
+        Service-->>Controller: Success Response
+        Controller-->>User: Confirmation
+    else Book Unavailable
+        Service-->>Controller: Error Status
+        Controller-->>User: Error Message
     end
 ```
 
-## Service Pattern
+### 2. Flow Upload Buku
 
-### File Management Service
+```mermaid
+sequenceDiagram
+    actor Admin
+    participant Controller
+    participant Storage
+    participant Model
+    participant DB
 
-1. **Upload Pattern**
+    Admin->>Controller: Upload Book Files
+    Controller->>Storage: Save Files
+    Storage-->>Controller: File Paths
+    Controller->>Model: Create Book Record
+    Model->>DB: Save Book Data
+    DB-->>Model: Success
+    Model-->>Controller: Book Created
+    Controller-->>Admin: Success Response
+```
 
-    - Validasi file (size, type, extension)
-    - Generate secure filename
-    - Save ke storage
-    - Create public symlink
+## Security Patterns
 
-2. **Access Pattern**
-    - Validasi existence
-    - Security headers
-    - Streaming response
+### 1. Authentication
 
-### Database Access Pattern
+-   Laravel built-in auth system
+-   Session-based authentication
+-   Remember me functionality
 
-1. **Model Relations**
+### 2. Authorization
 
-    ```php
-    // Peminjaman -> User
-    public function user() {
-        return $this->belongsTo(User::class);
-    }
+```mermaid
+flowchart TD
+    R[Request] -->|Authenticate| MW[Middleware]
+    MW -->|Check Role| P[Policy]
+    P -->|Role: Admin| AA[Admin Actions]
+    P -->|Role: Member| MA[Member Actions]
+    P -->|Unauthorized| E[Error Response]
+```
 
-    // Peminjaman -> Book
-    public function book() {
-        return $this->belongsTo(Book::class);
-    }
+### 3. File Access Security
 
-    // Peminjaman -> Admin
-    public function approver() {
-        return $this->belongsTo(User::class, 'approved_by');
-    }
-    ```
-
-2. **Query Pattern**
-    - Eager loading untuk relasi
-    - Pagination untuk list
-    - Scoped queries
+-   Private storage untuk file buku
+-   Public storage untuk thumbnails
+-   Validasi akses file melalui middleware
+-   Secure file streaming
 
 ## Error Handling Pattern
 
-### HTTP Errors
+### 1. Exception Handling
 
--   404: Resource tidak ditemukan
--   403: Unauthorized access
--   401: Unauthenticated
--   422: Validation error
-
-### Business Logic Errors
-
-1. **Peminjaman**
-
-    - Duplikasi peminjaman
-    - Invalid status transition
-    - File tidak ditemukan
-
-2. **Upload**
-    - Invalid file type
-    - File size exceeded
-    - Storage error
-
-### Error Response Pattern
-
-```php
-return redirect()
-    ->back()
-    ->with('error', 'Error message here');
+```mermaid
+flowchart LR
+    E[Exception] -->|Catch| H[Handler]
+    H -->|Log| L[Logger]
+    H -->|User Error| UR[User Response]
+    H -->|System Error| SR[System Response]
 ```
 
-## Success Response Pattern
+### 2. Validation Pattern
 
-```php
-return redirect()
-    ->route('route.name')
-    ->with('success', 'Success message here');
+-   Form request validation
+-   Custom validation rules
+-   Error messages dalam Bahasa Indonesia
+-   Front-end validation sync
+
+## Caching Pattern
+
+### 1. Data Caching
+
+-   Cache frequently accessed data
+-   Cache tags untuk grouping
+-   Automatic cache invalidation
+
+### 2. Response Caching
+
+-   Cache HTTP responses
+-   Rate limiting
+-   Cache headers
+
+## Monitoring & Logging
+
+### 1. Activity Logging
+
+-   User actions logging
+-   System events logging
+-   Error logging
+
+### 2. Performance Monitoring
+
+-   Query performance logging
+-   Cache hit/miss ratio
+-   File access patterns
+
+## Code Organization
+
+### 1. Directory Structure
+
+```
+app/
+├── Http/
+│   ├── Controllers/    # Request handlers
+│   ├── Middleware/     # Request filters
+│   └── Requests/       # Form validation
+├── Models/            # Database models
+├── Services/          # Business logic
+├── Policies/          # Authorization
+├── Events/            # System events
+└── Listeners/         # Event handlers
 ```
 
-## Validation Pattern
+### 2. Naming Conventions
 
-### Request Validation
+-   Controllers: PascalCase, suffix dengan Controller
+-   Models: PascalCase, singular
+-   Migrations: Snake_case dengan timestamp
+-   Views: Kebab-case
+-   Config: Snake_case
 
-```php
-$request->validate([
-    'field' => 'validation|rules',
-]);
-```
+## Testing Pattern
 
-### Custom Validation Rules
+### 1. Unit Testing
 
-1. **File Upload**
+-   Model testing
+-   Service testing
+-   Isolated tests
 
-    - Size limits
-    - Allowed types
-    - File existence
+### 2. Feature Testing
 
-2. **Peminjaman**
-    - Date validation
-    - Status transitions
-    - Duplicate check
+-   End-to-end testing
+-   API testing
+-   Authentication testing
 
-## Security Pattern
+### 3. Browser Testing
 
-### Route Protection
-
-1. **Authentication Check**
-
-    ```php
-    Route::middleware('auth')->group(function () {
-        // Protected routes
-    });
-    ```
-
-2. **Role Check**
-    ```php
-    Route::middleware(['auth', 'role:admin'])->group(function () {
-        // Admin only routes
-    });
-    ```
-
-### File Access Protection
-
-1. **Private Storage**
-
-    - Files stored outside public directory
-    - Access through controller only
-    - Symlink untuk public access
-
-2. **Download Protection**
-    - Secure headers
-    - Mime type validation
-    - Auth check sebelum download
+-   UI testing
+-   User flow testing
+-   JavaScript integration
