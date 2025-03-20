@@ -93,10 +93,10 @@
                     </div>
                     <p class="text-3xl font-bold text-gray-900 mb-4">
                         {{ \App\Models\Peminjaman::where('user_id', auth()->id())
-                            ->whereIn('status', ['menunggu', 'disetujui', 'dipinjam'])
+                            ->whereIn('status', ['menunggu', 'disetujui', 'dipinjam', 'menunggu_konfirmasi_kembali'])
                             ->count() }}
                     </p>
-                    <span class="text-gray-600">Buku sedang dalam proses peminjaman</span>
+                    <span class="text-gray-600">Termasuk yang menunggu persetujuan dan konfirmasi pengembalian</span>
                 </div>
             </div>
 
@@ -152,27 +152,20 @@
                                         {{ $peminjaman->tanggal_kembali->format('d M Y') }}
                                     </td>
                                     <td class="px-6 py-4 whitespace-nowrap">
-                                        @if($peminjaman->status === 'menunggu')
-                                            <span class="px-2 inline-flex text-xs leading-5 font-semibold rounded-full bg-yellow-100 text-yellow-800">
-                                                Menunggu Persetujuan
-                                            </span>
-                                        @elseif($peminjaman->status === 'disetujui')
-                                            <span class="px-2 inline-flex text-xs leading-5 font-semibold rounded-full bg-green-100 text-green-800">
-                                                Disetujui
-                                            </span>
-                                        @elseif($peminjaman->status === 'ditolak')
-                                            <span class="px-2 inline-flex text-xs leading-5 font-semibold rounded-full bg-red-100 text-red-800">
-                                                Ditolak
-                                            </span>
-                                        @elseif($peminjaman->status === 'dipinjam')
-                                            <span class="px-2 inline-flex text-xs leading-5 font-semibold rounded-full bg-blue-100 text-blue-800">
-                                                Sedang Dipinjam
-                                            </span>
-                                        @elseif($peminjaman->status === 'dikembalikan')
-                                            <span class="px-2 inline-flex text-xs leading-5 font-semibold rounded-full bg-gray-100 text-gray-800">
-                                                Dikembalikan
-                                            </span>
-                                        @endif
+                                        <span class="px-2 inline-flex text-xs leading-5 font-semibold rounded-full
+                                            {{ $peminjaman->status === 'menunggu' ? 'bg-yellow-100 text-yellow-800' : '' }}
+                                            {{ $peminjaman->status === 'disetujui' ? 'bg-green-100 text-green-800' : '' }}
+                                            {{ $peminjaman->status === 'ditolak' ? 'bg-red-100 text-red-800' : '' }}
+                                            {{ $peminjaman->status === 'dipinjam' ? 'bg-blue-100 text-blue-800' : '' }}
+                                            {{ $peminjaman->status === 'menunggu_konfirmasi_kembali' ? 'bg-indigo-100 text-indigo-800' : '' }}
+                                            {{ $peminjaman->status === 'dikembalikan' ? 'bg-gray-100 text-gray-800' : '' }}">
+                                            {{ $peminjaman->status === 'menunggu' ? 'Menunggu Persetujuan' : '' }}
+                                            {{ $peminjaman->status === 'disetujui' ? 'Disetujui' : '' }}
+                                            {{ $peminjaman->status === 'ditolak' ? 'Ditolak' : '' }}
+                                            {{ $peminjaman->status === 'dipinjam' ? 'Sedang Dipinjam' : '' }}
+                                            {{ $peminjaman->status === 'menunggu_konfirmasi_kembali' ? 'Menunggu Konfirmasi Pengembalian' : '' }}
+                                            {{ $peminjaman->status === 'dikembalikan' ? 'Dikembalikan' : '' }}
+                                        </span>
                                     </td>
                                     <td class="px-6 py-4 whitespace-nowrap text-right text-sm font-medium">
                                         @if($peminjaman->status === 'dipinjam')

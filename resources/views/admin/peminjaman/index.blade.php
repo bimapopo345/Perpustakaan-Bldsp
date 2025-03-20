@@ -46,7 +46,10 @@
                                     Tanggal Pinjam
                                 </th>
                                 <th class="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">
-                                    Tanggal Kembali
+                                    Tanggal Kembali (Rencana)
+                                </th>
+                                <th class="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">
+                                    Tanggal Dikembalikan
                                 </th>
                                 <th class="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">
                                     Status
@@ -83,6 +86,12 @@
                                     </td>
                                     <td class="px-6 py-4 whitespace-nowrap text-sm text-gray-500">
                                         {{ $pinjam->tanggal_kembali->format('d M Y') }}
+                                    </td>
+                                    <td class="px-6 py-4 whitespace-nowrap text-sm text-gray-500">
+                                        {{ $pinjam->tanggal_dikembalikan ? $pinjam->tanggal_dikembalikan->format('d M Y') : '-' }}
+                                        @if($pinjam->status === 'menunggu_konfirmasi_kembali')
+                                            <span class="text-xs text-indigo-600">(Menunggu Konfirmasi)</span>
+                                        @endif
                                     </td>
                                     <td class="px-6 py-4 whitespace-nowrap">
                                         <span class="px-2 inline-flex text-xs leading-5 font-semibold rounded-full
