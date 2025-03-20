@@ -4,8 +4,10 @@
             const modal = document.querySelector('#bookModal');
             const thumbnail = document.querySelector('#bookThumbnail');
             const noThumbnail = document.querySelector('#noThumbnail');
+            let currentBookId = null;
             
             window.addEventListener('book-selected', function(event) {
+                currentBookId = event.detail;
                 fetch('/book/' + event.detail)
                     .then(response => response.json())
                     .then(data => {
@@ -14,7 +16,6 @@
                         document.querySelector('#bookYear').textContent = data.tahun_terbit;
                         document.querySelector('#bookDescription').textContent = data.deskripsi;
                         document.querySelector('#readBookBtn').href = data.read_url;
-                        document.querySelector('.book-id').value = data.id;
                         
                         if (data.thumbnail_path) {
                             thumbnail.src = data.thumbnail_path;
@@ -26,6 +27,19 @@
                         }
                     });
             });
+
+            window.redirectToPeminjaman = function(event) {
+                event.preventDefault();
+                if (currentBookId) {
+                    fetch('/book/' + currentBookId)
+                        .then(response => response.json())
+                        .then(data => {
+                            if (data.pinjam_url) {
+                                window.location.href = data.pinjam_url;
+                            }
+                        });
+                }
+            }
 
             function closeModal() {
                 modal.classList.add('hidden');
@@ -44,9 +58,7 @@
         <!-- Modal Panel -->
         <div class="fixed inset-0 z-10 overflow-y-auto">
             <div class="flex min-h-full items-end justify-center p-4 text-center sm:items-center sm:p-0">
-                <div
-                     class="relative transform overflow-hidden rounded-2xl bg-white text-left shadow-xl transition-all sm:my-8 sm:w-full sm:max-w-4xl ease-out duration-300">
-
+                <div class="relative transform overflow-hidden rounded-2xl bg-white text-left shadow-xl transition-all sm:my-8 sm:w-full sm:max-w-4xl ease-out duration-300">
                     <!-- Close Button -->
                     <button id="closeModal"
                             class="absolute top-4 right-4 text-gray-500 hover:text-gray-700 z-10">
@@ -98,13 +110,8 @@
 
                                     @auth
                                         @if(auth()->user()->role === 'member')
-                                            <form method="POST" action="{{ route('peminjaman.store') }}" class="inline borrow-form">
-                                                @csrf
-                                                <input type="hidden" name="book_id" class="book-id">
-                                                <input type="hidden" name="tanggal_pinjam" value="{{ date('Y-m-d') }}">
-                                                <input type="hidden" name="durasi" value="1">
-                                                <button type="submit"
-                                                        class="inline-flex items-center px-6 py-3 border border-transparent text-base font-medium 
+                                            <a href="#" onclick="redirectToPeminjaman(event)"
+                                               class="inline-flex items-center px-6 py-3 border border-transparent text-base font-medium 
                                                       rounded-xl text-white bg-gradient-to-r from-green-600 to-teal-600 
                                                       hover:from-green-700 hover:to-teal-700 focus:outline-none focus:ring-2 
                                                       focus:ring-offset-2 focus:ring-green-500 transition-all duration-300 
@@ -114,8 +121,7 @@
                                                           d="M12 9v3m0 0v3m0-3h3m-3 0H9m12 0a9 9 0 11-18 0 9 9 0 0118 0z"/>
                                                 </svg>
                                                 Pinjam Buku
-                                                </button>
-                                            </form>
+                                            </a>
                                         @endif
                                     @else
                                         <a href="{{ route('login') }}"

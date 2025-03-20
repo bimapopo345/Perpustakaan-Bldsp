@@ -40,18 +40,22 @@ class PeminjamanController extends Controller
             return back()->with('error', 'Hanya peminjaman dengan status menunggu yang dapat disetujui');
         }
         
-        $peminjaman->update([
-            'status' => 'disetujui',
-            'approved_by' => auth()->id(),
-        ]);
-        
-        return back()->with('success', 'Peminjaman berhasil disetujui');
+        try {
+            $peminjaman->update([
+                'status' => 'dipinjam',  // Langsung set ke dipinjam
+                'approved_by' => auth()->id(),
+            ]);
+            
+            return back()->with('success', 'Peminjaman berhasil disetujui dan buku dapat dipinjam');
+        } catch (\Exception $e) {
+            return back()->with('error', 'Terjadi kesalahan saat menyetujui peminjaman');
+        }
     }
 
     /**
      * Menolak peminjaman
      */
-    public function reject($id)
+    public function reject(Request $request, $id)
     {
         $peminjaman = Peminjaman::findOrFail($id);
         
@@ -60,31 +64,41 @@ class PeminjamanController extends Controller
             return back()->with('error', 'Hanya peminjaman dengan status menunggu yang dapat ditolak');
         }
         
-        $peminjaman->update([
-            'status' => 'ditolak',
-            'approved_by' => auth()->id(),
-        ]);
-        
-        return back()->with('success', 'Peminjaman berhasil ditolak');
+        try {
+            $peminjaman->update([
+                'status' => 'ditolak',
+                'approved_by' => auth()->id(),
+                'catatan' => $request->catatan ?? 'Peminjaman ditolak oleh admin'
+            ]);
+            
+            return back()->with('success', 'Peminjaman berhasil ditolak');
+        } catch (\Exception $e) {
+            return back()->with('error', 'Terjadi kesalahan saat menolak peminjaman');
+        }
     }
 
     /**
-     * Mengonfirmasi pengembalian buku
+     * Mengonfirmasi pengembalian buku dari member
      */
-    public function return($id)
+    public function confirmReturn($id)
     {
         $peminjaman = Peminjaman::findOrFail($id);
         
-        // Hanya bisa return yang status dipinjam
-        if ($peminjaman->status !== 'dipinjam') {
-            return back()->with('error', 'Hanya peminjaman dengan status dipinjam yang dapat dikembalikan');
+        // Hanya bisa konfirmasi yang status menunggu konfirmasi kembali
+        if ($peminjaman->status !== 'menunggu_konfirmasi_kembali') {
+            return back()->with('error', 'Hanya peminjaman dengan status menunggu konfirmasi kembali yang dapat dikonfirmasi');
         }
         
-        $peminjaman->update([
-            'status' => 'dikembalikan',
-            'tanggal_dikembalikan' => now(),
-        ]);
-        
-        return back()->with('success', 'Buku berhasil dikembalikan');
+        try {
+            $peminjaman->update([
+                'status' => 'dikembalikan',
+                'approved_by' => auth()->id(),
+                'tanggal_dikembalikan' => now()
+            ]);
+            
+            return back()->with('success', 'Pengembalian buku berhasil dikonfirmasi');
+        } catch (\Exception $e) {
+            return back()->with('error', 'Terjadi kesalahan saat mengkonfirmasi pengembalian');
+        }
     }
 }

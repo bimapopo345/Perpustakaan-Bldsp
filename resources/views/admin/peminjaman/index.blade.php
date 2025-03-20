@@ -13,6 +13,7 @@
                         <option value="{{ route('admin.peminjaman.index', ['status' => 'menunggu']) }}" {{ request('status') === 'menunggu' ? 'selected' : '' }}>Menunggu</option>
                         <option value="{{ route('admin.peminjaman.index', ['status' => 'disetujui']) }}" {{ request('status') === 'disetujui' ? 'selected' : '' }}>Disetujui</option>
                         <option value="{{ route('admin.peminjaman.index', ['status' => 'dipinjam']) }}" {{ request('status') === 'dipinjam' ? 'selected' : '' }}>Dipinjam</option>
+                        <option value="{{ route('admin.peminjaman.index', ['status' => 'menunggu_konfirmasi_kembali']) }}" {{ request('status') === 'menunggu_konfirmasi_kembali' ? 'selected' : '' }}>Menunggu Konfirmasi Kembali</option>
                         <option value="{{ route('admin.peminjaman.index', ['status' => 'dikembalikan']) }}" {{ request('status') === 'dikembalikan' ? 'selected' : '' }}>Dikembalikan</option>
                         <option value="{{ route('admin.peminjaman.index', ['status' => 'ditolak']) }}" {{ request('status') === 'ditolak' ? 'selected' : '' }}>Ditolak</option>
                         <option value="{{ route('admin.peminjaman.index', ['status' => 'terlambat']) }}" {{ request('status') === 'terlambat' ? 'selected' : '' }}>Terlambat</option>
@@ -88,10 +89,11 @@
                                             {{ $pinjam->status === 'menunggu' ? 'bg-yellow-100 text-yellow-800' : '' }}
                                             {{ $pinjam->status === 'disetujui' ? 'bg-blue-100 text-blue-800' : '' }}
                                             {{ $pinjam->status === 'dipinjam' ? 'bg-green-100 text-green-800' : '' }}
+                                            {{ $pinjam->status === 'menunggu_konfirmasi_kembali' ? 'bg-purple-100 text-purple-800' : '' }}
                                             {{ $pinjam->status === 'dikembalikan' ? 'bg-gray-100 text-gray-800' : '' }}
                                             {{ $pinjam->status === 'ditolak' ? 'bg-red-100 text-red-800' : '' }}
                                             {{ $pinjam->status === 'terlambat' ? 'bg-red-100 text-red-800' : '' }}">
-                                            {{ ucfirst($pinjam->status) }}
+                                            {{ str_replace('_', ' ', ucfirst($pinjam->status)) }}
                                         </span>
                                     </td>
                                     <td class="px-6 py-4 whitespace-nowrap text-sm">
@@ -110,10 +112,12 @@
                                                 </button>
                                             @endif
 
-                                            @if($pinjam->status === 'dipinjam')
-                                                <form action="{{ route('admin.peminjaman.return', $pinjam->id) }}" method="POST" class="inline">
+                                            @if($pinjam->status === 'menunggu_konfirmasi_kembali')
+                                                <form action="{{ route('admin.peminjaman.confirm-return', $pinjam->id) }}" method="POST" class="inline">
                                                     @csrf
-                                                    <button type="submit" class="text-green-600 hover:text-green-900">
+                                                    <button type="submit" 
+                                                            class="text-green-600 hover:text-green-900"
+                                                            onclick="return confirm('Konfirmasi pengembalian buku ini?')">
                                                         Konfirmasi Pengembalian
                                                     </button>
                                                 </form>

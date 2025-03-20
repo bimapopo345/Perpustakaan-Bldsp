@@ -32,10 +32,14 @@ Route::middleware(['auth', 'role:member'])->group(function () {
     Route::get('/member/dashboard', [MemberController::class, 'dashboard'])->name('member.dashboard');
     
     // Peminjaman Routes
-    Route::get('/peminjaman', [PeminjamanController::class, 'index'])->name('peminjaman.index');
-    Route::get('/peminjaman/{id}', [PeminjamanController::class, 'show'])->name('peminjaman.show');
-    Route::get('/book/pinjam/{id}', [PeminjamanController::class, 'create'])->name('peminjaman.create');
-    Route::post('/book/pinjam', [PeminjamanController::class, 'store'])->name('peminjaman.store');
+    // Peminjaman Resource Routes
+    Route::prefix('peminjaman')->name('peminjaman.')->group(function () {
+        Route::get('/', [PeminjamanController::class, 'index'])->name('index');
+        Route::get('/create/{id}', [PeminjamanController::class, 'create'])->name('create');
+        Route::post('/store', [PeminjamanController::class, 'store'])->name('store');
+        Route::get('/{id}', [PeminjamanController::class, 'show'])->name('show');
+        Route::post('/{id}/return', [PeminjamanController::class, 'return'])->name('return');
+    });
 });
 
 Route::post('/logout', [LoginController::class, 'logout'])
@@ -62,5 +66,5 @@ Route::middleware(['auth', 'role:admin'])
         Route::get('/peminjaman', [AdminPeminjamanController::class, 'index'])->name('peminjaman.index');
         Route::post('/peminjaman/{id}/approve', [AdminPeminjamanController::class, 'approve'])->name('peminjaman.approve');
         Route::post('/peminjaman/{id}/reject', [AdminPeminjamanController::class, 'reject'])->name('peminjaman.reject');
-        Route::post('/peminjaman/{id}/return', [AdminPeminjamanController::class, 'return'])->name('peminjaman.return');
+        Route::post('/peminjaman/{id}/confirm-return', [AdminPeminjamanController::class, 'confirmReturn'])->name('peminjaman.confirm-return');
     });

@@ -38,62 +38,96 @@
             </div>
 
             <!-- Form Peminjaman -->
-            <form action="{{ route('peminjaman.store') }}" method="POST">
+            <form action="{{ route('peminjaman.store') }}" method="POST" x-data="{ 
+                tanggalPinjam: '{{ old('tanggal_pinjam', date('Y-m-d')) }}',
+                tanggalKembali: '{{ old('tanggal_kembali', date('Y-m-d', strtotime('+1 day'))) }}',
+                durasi: 0,
+                maxDurasi: 7,
+                hitungDurasi() {
+                    const start = new Date(this.tanggalPinjam + 'T00:00:00Z');
+                    const end = new Date(this.tanggalKembali + 'T00:00:00Z');
+                    const diffTime = end.getTime() - start.getTime();
+                    this.durasi = Math.floor(diffTime / (1000 * 60 * 60 * 24));
+                    console.log('Durasi:', this.durasi, 'hari', { start: this.tanggalPinjam, end: this.tanggalKembali });
+                },
+                isDurasiValid() {
+                    return this.durasi >= 1 && this.durasi <= this.maxDurasi;
+                }
+            }" x-init="hitungDurasi()">
                 @csrf
                 <input type="hidden" name="book_id" value="{{ $book->id }}">
                 
-                <div class="mb-4">
-                    <label for="tanggal_pinjam" class="block text-sm font-medium text-gray-700 mb-1">
-                        Tanggal Pinjam
-                    </label>
-                    <input type="date" 
-                           id="tanggal_pinjam" 
-                           name="tanggal_pinjam" 
-                           value="{{ old('tanggal_pinjam', date('Y-m-d')) }}"
-                           min="{{ date('Y-m-d') }}"
-                           class="mt-1 block w-full rounded-md border-gray-300 shadow-sm focus:border-blue-500 focus:ring-blue-500"
-                           required>
-                    @error('tanggal_pinjam')
-                        <p class="mt-1 text-sm text-red-600">{{ $message }}</p>
-                    @enderror
+                <div class="space-y-4">
+                    <!-- Tanggal Pinjam -->
+                    <div>
+                        <label for="tanggal_pinjam" class="block text-sm font-medium text-gray-700 mb-1">
+                            Tanggal Pinjam
+                        </label>
+                        <input type="date" 
+                               id="tanggal_pinjam" 
+                               name="tanggal_pinjam" 
+                               x-model="tanggalPinjam"
+                               @change="hitungDurasi()"
+                               min="{{ date('Y-m-d') }}"
+                               class="mt-1 block w-full rounded-md border-gray-300 shadow-sm focus:border-blue-500 focus:ring-blue-500"
+                               required>
+                        @error('tanggal_pinjam')
+                            <p class="mt-1 text-sm text-red-600">{{ $message }}</p>
+                        @enderror
+                    </div>
+
+                    <!-- Tanggal Kembali -->
+                    <div>
+                        <label for="tanggal_kembali" class="block text-sm font-medium text-gray-700 mb-1">
+                            Tanggal Kembali
+                        </label>
+                        <input type="date" 
+                               id="tanggal_kembali" 
+                               name="tanggal_kembali" 
+                               x-model="tanggalKembali"
+                               @change="hitungDurasi()"
+                               min="{{ date('Y-m-d', strtotime('+1 day')) }}"
+                               class="mt-1 block w-full rounded-md border-gray-300 shadow-sm focus:border-blue-500 focus:ring-blue-500"
+                               required>
+                        @error('tanggal_kembali')
+                            <p class="mt-1 text-sm text-red-600">{{ $message }}</p>
+                        @enderror
+                    </div>
+
+                    <!-- Info Durasi -->
+                    <div class="p-4 rounded-lg" :class="isDurasiValid() ? 'bg-green-50' : 'bg-red-50'">
+                        <div class="flex items-center">
+                            <div class="mr-3" x-show="isDurasiValid()">
+                                <svg class="h-5 w-5 text-green-400" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                                    <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M5 13l4 4L19 7"/>
+                                </svg>
+                            </div>
+                            <div class="mr-3" x-show="!isDurasiValid()">
+                                <svg class="h-5 w-5 text-red-400" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                                    <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M6 18L18 6M6 6l12 12"/>
+                                </svg>
+                            </div>
+                            <div>
+                                <p class="text-sm" :class="isDurasiValid() ? 'text-green-700' : 'text-red-700'">
+                                    <span x-text="durasi"></span> hari peminjaman
+                                </p>
+                                <p class="text-xs" :class="isDurasiValid() ? 'text-green-600' : 'text-red-600'">
+                                    Maksimal durasi peminjaman adalah <span x-text="maxDurasi"></span> hari
+                                </p>
+                            </div>
+                        </div>
+                    </div>
                 </div>
 
-                <div class="mb-6">
-                    <label for="durasi" class="block text-sm font-medium text-gray-700 mb-1">
-                        Durasi Peminjaman (Hari)
-                    </label>
-                    <select id="durasi" 
-                            name="durasi"
-                            class="mt-1 block w-full rounded-md border-gray-300 shadow-sm focus:border-blue-500 focus:ring-blue-500"
-                            required>
-                        @for($i = 1; $i <= 7; $i++)
-                            <option value="{{ $i }}" {{ old('durasi') == $i ? 'selected' : '' }}>
-                                {{ $i }} hari
-                            </option>
-                        @endfor
-                    </select>
-                    @error('durasi')
-                        <p class="mt-1 text-sm text-red-600">{{ $message }}</p>
-                    @enderror
-                </div>
-
-                <!-- Preview Tanggal Kembali -->
-                <div class="mb-8 p-4 bg-gray-50 rounded-lg">
-                    <p class="text-sm text-gray-600 mb-2">
-                        Tanggal kembali akan dihitung otomatis berdasarkan durasi peminjaman yang dipilih.
-                    </p>
-                    <p class="text-sm font-medium text-gray-900">
-                        Maksimal durasi peminjaman adalah 7 hari.
-                    </p>
-                </div>
-
-                <div class="flex justify-end space-x-3">
+                <div class="flex justify-end space-x-3 mt-6">
                     <a href="{{ url()->previous() }}" 
                        class="inline-flex justify-center rounded-md border border-gray-300 bg-white px-4 py-2 text-sm font-medium text-gray-700 shadow-sm hover:bg-gray-50 focus:outline-none focus:ring-2 focus:ring-blue-500 focus:ring-offset-2">
                         Batal
                     </a>
                     <button type="submit"
-                            class="inline-flex justify-center rounded-md border border-transparent bg-blue-600 px-4 py-2 text-sm font-medium text-white shadow-sm hover:bg-blue-700 focus:outline-none focus:ring-2 focus:ring-blue-500 focus:ring-offset-2">
+                            :disabled="!isDurasiValid()"
+                            class="inline-flex justify-center rounded-md border border-transparent px-4 py-2 text-sm font-medium shadow-sm focus:outline-none focus:ring-2 focus:ring-blue-500 focus:ring-offset-2"
+                            :class="isDurasiValid() ? 'bg-blue-600 hover:bg-blue-700 text-white' : 'bg-gray-400 cursor-not-allowed text-gray-300'">
                         Ajukan Peminjaman
                     </button>
                 </div>

@@ -136,6 +136,7 @@
                                 <th class="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">Tanggal Pinjam</th>
                                 <th class="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">Tanggal Kembali</th>
                                 <th class="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">Status</th>
+                                <th class="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">Aksi</th>
                             </tr>
                         </thead>
                         <tbody class="bg-white divide-y divide-gray-200">
@@ -171,6 +172,18 @@
                                             <span class="px-2 inline-flex text-xs leading-5 font-semibold rounded-full bg-gray-100 text-gray-800">
                                                 Dikembalikan
                                             </span>
+                                        @endif
+                                    </td>
+                                    <td class="px-6 py-4 whitespace-nowrap text-right text-sm font-medium">
+                                        @if($peminjaman->status === 'dipinjam')
+                                            <form action="{{ route('peminjaman.return', $peminjaman->id) }}" method="POST" class="inline">
+                                                @csrf
+                                                <button type="submit" 
+                                                        class="text-white bg-green-600 hover:bg-green-700 px-3 py-1 rounded-md text-sm font-medium transition-colors duration-200"
+                                                        onclick="return confirm('Apakah Anda yakin ingin mengembalikan buku ini?')">
+                                                    Kembalikan Buku
+                                                </button>
+                                            </form>
                                         @endif
                                     </td>
                                 </tr>
